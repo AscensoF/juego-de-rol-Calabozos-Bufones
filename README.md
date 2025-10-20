@@ -72,6 +72,6 @@ Este juego fue creado con caos, café y una pasión por los juegos de rol.
 -   **Diseño y Desarrollo:** [Miguel - Ascenso Financiero]
 -   **Tecnologías:** HTML5, CSS3, JavaScript (ES6+), TailwindCSS (vía CDN), Tone.js.
 -   **Fuentes:** 'Cinzel' y 'Inter' de Google Fonts.
--   *Agradecimientos especiales a [cualquier persona o recurso que quieras mencionar].*
+-   *Agradecimientos especiales a mi pareja por aguantar mis frikadas.*
 
 ¡Disfruta de la aventura y que tus pifias sean pocas!
