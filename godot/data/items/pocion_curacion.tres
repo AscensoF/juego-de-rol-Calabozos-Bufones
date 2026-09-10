@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = "HEALING_POTION"
+item_name = "Poción de Curación"
+description = "Un clásico burbujeante. Recupera 10 PV de forma inmediata."
+item_type = 0
+target_type = 0
+range_distance = 0
+area_radius = 0
+heal_amount = 10
+damage_dice_count = 0
+damage_dice_sides = 0
+applied_status = 0
+status_duration_turns = 0

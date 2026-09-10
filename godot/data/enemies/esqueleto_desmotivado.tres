@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/enemy_data.gd" id="1_enemy"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/enemies/esqueleto.png" id="2_portrait"]
+
+[resource]
+script = ExtResource("1_enemy")
+id = "enemy_esqueleto_desmotivado"
+enemy_name = "Esqueleto Desmotivado"
+enemy_kind = 1
+portrait = ExtResource("2_portrait")
+is_boss = false
+base_hp = 12
+armor_class = 13
+attack_bonus = 4
+damage_dice_count = 1
+damage_dice_sides = 6
+damage_flat_bonus = 2
+speed = 4
+initiative_bonus = -1
+xp_reward = 20
+special_ability_id = "apatia"
+special_ability_name = "Apatía Existencial"
+special_ability_desc = "Cuestiona el sentido de seguir de pie; tiene un 40% de probabilidad de saltarse su turno contemplando el vacío."

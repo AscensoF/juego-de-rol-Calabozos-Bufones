@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/ability_data.gd" id="1_ability"]
+
+[resource]
+script = ExtResource("1_ability")
+id = "inmortal"
+ability_name = "Inmortal (por un rato)"
+description = "Una vez por combate, Throg grita '¡NO HOY!' e ignora todo el daño recibido hasta su próximo turno."
+cost = 2
+required_level = 1
+once_per_combat = true
+target_type = 0
+ability_type = 4
+range_distance = 0
+area_radius = 0
+requires_adjacent_ally = false
+auto_hit = false
+damage_dice_count = 0
+damage_dice_sides = 0
+damage_flat_bonus = 0
+heal_dice_count = 0
+heal_dice_sides = 0
+heal_flat_bonus = 0
+applied_status = 5
+status_duration_turns = 2
+backlash_threshold = 0
+taunt_enemies_in_radius = 0
+animation_effect_name = "invulnerable_shield"

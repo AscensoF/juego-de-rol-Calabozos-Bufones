@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="HeroData" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/hero_data.gd" id="1_hero"]
+[ext_resource type="Script" path="res://src/data_classes/character_attributes.gd" id="2_attrs"]
+[ext_resource type="Resource" path="res://data/abilities/beryl_sanacion.tres" id="3_a1"]
+[ext_resource type="Resource" path="res://data/abilities/beryl_intervencion_divina.tres" id="4_a2"]
+[ext_resource type="Resource" path="res://data/abilities/beryl_palabra_divina.tres" id="5_a3"]
+[ext_resource type="Resource" path="res://data/items/pocion_curacion.tres" id="6_item"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/heroes/beryl.png" id="7_portrait"]
+
+[sub_resource type="Resource" id="SubResource_beryl_attrs"]
+script = ExtResource("2_attrs")
+strength = 14
+dexterity = 8
+constitution = 12
+intelligence = 10
+wisdom = 16
+charisma = 14
+
+[resource]
+script = ExtResource("1_hero")
+id = "hero_beryl"
+hero_name = "Sister Beryl la Clérigo Irreverente"
+hero_class = 3
+lore_history = "Beryl regentaba una cervecería monástica. Durante la Pifia, rezó para que los barriles no se agriaran y una deidad menor del buen beber y las peleas de taberna respondió. Ahora canaliza poder divino a través de su martillo y su fiel gallina de combate, Clotilde."
+lore_attributes = "SABIDURÍA para elaborar la mejor cerveza sagrada. FUERZA para expulsar parroquianos violentos. Fe inquebrantable."
+portrait = ExtResource("7_portrait")
+base_hp = 12
+base_ac = 14
+speed = 6
+resource_name = "Fe"
+base_resource = 3
+starting_attribute_points = 1
+attributes = SubResource("SubResource_beryl_attrs")
+abilities = Array[Resource]([ExtResource("3_a1"), ExtResource("4_a2"), ExtResource("5_a3")])
+starting_inventory = Array[Resource]([ExtResource("6_item")])

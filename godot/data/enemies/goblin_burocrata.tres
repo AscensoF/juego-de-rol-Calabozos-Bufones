@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/enemy_data.gd" id="1_enemy"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/enemies/goblin.png" id="2_portrait"]
+
+[resource]
+script = ExtResource("1_enemy")
+id = "enemy_goblin_burocrata"
+enemy_name = "Goblin Burócrata"
+enemy_kind = 0
+portrait = ExtResource("2_portrait")
+is_boss = false
+base_hp = 10
+armor_class = 12
+attack_bonus = 2
+damage_dice_count = 1
+damage_dice_sides = 4
+damage_flat_bonus = 0
+speed = 5
+initiative_bonus = 3
+xp_reward = 15
+special_ability_id = "formulario_27b"
+special_ability_name = "Formulario 27B/6"
+special_ability_desc = "Exige acreditación oficial al héroe más cercano, paralizándolo con sellos y tasas administrativas durante 1 turno."

@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/ability_data.gd" id="1_ability"]
+
+[resource]
+script = ExtResource("1_ability")
+id = "ataque_furtivo"
+ability_name = "Ataque Furtivo"
+description = "Apuñalamiento con ventaja. Requiere un aliado adyacente al objetivo para infligir +1d6 adicional."
+cost = 1
+required_level = 1
+once_per_combat = false
+target_type = 1
+ability_type = 0
+range_distance = 1
+area_radius = 0
+requires_adjacent_ally = true
+auto_hit = false
+damage_dice_count = 1
+damage_dice_sides = 6
+damage_flat_bonus = 0
+heal_dice_count = 0
+heal_dice_sides = 0
+heal_flat_bonus = 0
+applied_status = 0
+status_duration_turns = 0
+backlash_threshold = 0
+taunt_enemies_in_radius = 0
+animation_effect_name = "dagger_sneak"

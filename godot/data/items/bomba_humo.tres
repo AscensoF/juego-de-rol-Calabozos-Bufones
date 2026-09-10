@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/item_data.gd" id="1_item"]
+
+[resource]
+script = ExtResource("1_item")
+id = "SMOKE_BOMB"
+item_name = "Bomba de Humo"
+description = "Permite un reposicionamiento táctico libre en un radio de 4 casillas."
+item_type = 2
+target_type = 6
+range_distance = 4
+area_radius = 0
+heal_amount = 0
+damage_dice_count = 0
+damage_dice_sides = 0
+applied_status = 0
+status_duration_turns = 0

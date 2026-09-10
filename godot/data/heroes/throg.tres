@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="HeroData" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/hero_data.gd" id="1_hero"]
+[ext_resource type="Script" path="res://src/data_classes/character_attributes.gd" id="2_attrs"]
+[ext_resource type="Resource" path="res://data/abilities/throg_golpe_poderoso.tres" id="3_a1"]
+[ext_resource type="Resource" path="res://data/abilities/throg_inmortal.tres" id="4_a2"]
+[ext_resource type="Resource" path="res://data/abilities/throg_grito_desafiante.tres" id="5_a3"]
+[ext_resource type="Resource" path="res://data/items/pocion_curacion.tres" id="6_item"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/heroes/throg.png" id="7_portrait"]
+
+[sub_resource type="Resource" id="SubResource_throg_attrs"]
+script = ExtResource("2_attrs")
+strength = 16
+dexterity = 12
+constitution = 14
+intelligence = 8
+wisdom = 10
+charisma = 12
+
+[resource]
+script = ExtResource("1_hero")
+id = "hero_throg"
+hero_name = "Throg el Guerrero Buldero"
+hero_class = 0
+lore_history = "Throg era el portero del 'Bar los Muertos' hasta que la Gran Pifia teletransportó el bar a mitad de un campo de batalla. Descubrió que era bueno golpeando cosas y decidió profesionalizarse. Su armadura está cubierta de parches de sus bandas favoritas y de 'Penélope', el nombre de su hacha."
+lore_attributes = "FUERZA bruta para abrirse paso y abrir botellines. CONSTITUCIÓN de hierro, forjada a base de guisos dudosos. Su CARISMA es... directo."
+portrait = ExtResource("7_portrait")
+base_hp = 14
+base_ac = 14
+speed = 6
+resource_name = "Furia"
+base_resource = 2
+starting_attribute_points = 1
+attributes = SubResource("SubResource_throg_attrs")
+abilities = Array[Resource]([ExtResource("3_a1"), ExtResource("4_a2"), ExtResource("5_a3")])
+starting_inventory = Array[Resource]([ExtResource("6_item")])

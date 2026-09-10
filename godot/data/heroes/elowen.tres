@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="HeroData" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/hero_data.gd" id="1_hero"]
+[ext_resource type="Script" path="res://src/data_classes/character_attributes.gd" id="2_attrs"]
+[ext_resource type="Resource" path="res://data/abilities/elowen_misil_magico.tres" id="3_a1"]
+[ext_resource type="Resource" path="res://data/abilities/elowen_tormenta_sarcasmo.tres" id="4_a2"]
+[ext_resource type="Resource" path="res://data/abilities/elowen_singularidad_caotica.tres" id="5_a3"]
+[ext_resource type="Resource" path="res://data/items/pocion_curacion.tres" id="6_item"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/heroes/elowen.png" id="7_portrait"]
+
+[sub_resource type="Resource" id="SubResource_elowen_attrs"]
+script = ExtResource("2_attrs")
+strength = 8
+dexterity = 14
+constitution = 12
+intelligence = 16
+wisdom = 14
+charisma = 10
+
+[resource]
+script = ExtResource("1_hero")
+id = "hero_elowen"
+hero_name = "Elowen la Maga Sarcástica"
+hero_class = 1
+lore_history = "Elowen era bibliotecaria en la Última Biblioteca, hasta que un tomo de 'optimización de estanterías' explotó en sus manos durante la Pifia. Ahora la magia caótica fluye a través de ella, invariablemente secundada por un comentario mordaz."
+lore_attributes = "INTELIGENCIA afilada como el cristal de su bastón. SABIDURÍA para saber cuándo callar (casi nunca). Su DESTREZA es alta para esquivar libros caídos."
+portrait = ExtResource("7_portrait")
+base_hp = 10
+base_ac = 12
+speed = 6
+resource_name = "Maná"
+base_resource = 4
+starting_attribute_points = 1
+attributes = SubResource("SubResource_elowen_attrs")
+abilities = Array[Resource]([ExtResource("3_a1"), ExtResource("4_a2"), ExtResource("5_a3")])
+starting_inventory = Array[Resource]([ExtResource("6_item")])

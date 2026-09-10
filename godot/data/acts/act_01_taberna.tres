@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ActData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/act_data.gd" id="1_act"]
+[ext_resource type="Resource" path="res://data/enemies/goblin_burocrata.tres" id="2_e1"]
+[ext_resource type="Resource" path="res://data/enemies/esqueleto_desmotivado.tres" id="3_e2"]
+[ext_resource type="Resource" path="res://data/enemies/rey_orco_karaoke.tres" id="4_boss"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/act1.ogg" id="5_music"]
+
+[resource]
+script = ExtResource("1_act")
+act_number = 1
+title = "Acto I: La Taberna del Destino Dudoso"
+synopsis = "Una serie de perturbaciones sonoras os lleva a la guarida de Grimgor 'El Barítono', un rey orco obsesionado con el karaoke cuya voz está doblando la realidad."
+faction = "S.A.C. (Sindicato de Aventureros Cansados)"
+mission_description = "El Sindicato os contrata para silenciar al 'vecino ruidoso'. Simple, ¿verdad?"
+mission_objective = "Derrota al Rey Orco del Karaoke."
+available_enemies = Array[Resource]([ExtResource("2_e1"), ExtResource("3_e2")])
+boss = ExtResource("4_boss")
+map_style = "act1"
+background_music = ExtResource("5_music")

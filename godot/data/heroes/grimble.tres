@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="HeroData" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/hero_data.gd" id="1_hero"]
+[ext_resource type="Script" path="res://src/data_classes/character_attributes.gd" id="2_attrs"]
+[ext_resource type="Resource" path="res://data/abilities/grimble_ataque_furtivo.tres" id="3_a1"]
+[ext_resource type="Resource" path="res://data/abilities/grimble_bolsillos_ajenos.tres" id="4_a2"]
+[ext_resource type="Resource" path="res://data/abilities/grimble_acto_desaparicion.tres" id="5_a3"]
+[ext_resource type="Resource" path="res://data/items/pocion_curacion.tres" id="6_item"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/heroes/grimble.png" id="7_portrait"]
+
+[sub_resource type="Resource" id="SubResource_grimble_attrs"]
+script = ExtResource("2_attrs")
+strength = 10
+dexterity = 16
+constitution = 12
+intelligence = 14
+wisdom = 8
+charisma = 14
+
+[resource]
+script = ExtResource("1_hero")
+id = "hero_grimble"
+hero_name = "Grimble el Pícaro Bocazas"
+hero_class = 2
+lore_history = "Grimble era un carterista hasta que la Pifia le concedió la habilidad de robar conceptos abstractos. Su gran golpe fue sustraer el 'sentido de la orientación' a un minotauro. Ahora busca el botín definitivo: el 'sentido común' que perdieron los dioses."
+lore_attributes = "DESTREZA increíble para el sigilo y para gesticular mientras farda de sus robos. CARISMA magnético aunque sospechoso."
+portrait = ExtResource("7_portrait")
+base_hp = 12
+base_ac = 13
+speed = 7
+resource_name = "Astucia"
+base_resource = 3
+starting_attribute_points = 1
+attributes = SubResource("SubResource_grimble_attrs")
+abilities = Array[Resource]([ExtResource("3_a1"), ExtResource("4_a2"), ExtResource("5_a3")])
+starting_inventory = Array[Resource]([ExtResource("6_item")])

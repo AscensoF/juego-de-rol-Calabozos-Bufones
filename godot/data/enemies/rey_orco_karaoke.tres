@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/enemy_data.gd" id="1_enemy"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/enemies/rey_orco.png" id="2_portrait"]
+
+[resource]
+script = ExtResource("1_enemy")
+id = "enemy_rey_orco_karaoke"
+enemy_name = "Rey Orco del Karaoke"
+enemy_kind = 5
+portrait = ExtResource("2_portrait")
+is_boss = true
+base_hp = 80
+armor_class = 15
+attack_bonus = 7
+damage_dice_count = 2
+damage_dice_sides = 8
+damage_flat_bonus = 3
+speed = 5
+initiative_bonus = 2
+xp_reward = 200
+special_ability_id = "solo_de_gritos"
+special_ability_name = "Solo de Gritos"
+special_ability_desc = "Emite un falsete atronador que inflige 1d10 de daño sónico a todos los héroes en un radio de 5 casillas. Entra en Furia (<50% PV)."

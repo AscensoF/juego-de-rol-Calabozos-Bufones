@@ -1,0 +1,140 @@
+[gd_scene load_steps=17 format=3 uid="uid://cb_main_game_scene"]
+
+[ext_resource type="Script" path="res://src/core/game_manager.gd" id="1_game_mgr"]
+[ext_resource type="Script" path="res://src/map/grid_renderer.gd" id="2_grid_ren"]
+[ext_resource type="Script" path="res://src/pooling/pool_manager.gd" id="3_pool_mgr"]
+[ext_resource type="Script" path="res://src/state_machine/state_machine.gd" id="4_state_mach"]
+[ext_resource type="Script" path="res://src/state_machine/states/main_menu_state.gd" id="5_menu_state"]
+[ext_resource type="Script" path="res://src/state_machine/states/exploration_state.gd" id="6_expl_state"]
+[ext_resource type="Script" path="res://src/state_machine/states/combat_state.gd" id="7_comb_state"]
+[ext_resource type="Script" path="res://src/state_machine/states/dj_mode_state.gd" id="8_dj_state"]
+[ext_resource type="Script" path="res://src/state_machine/states/game_over_state.gd" id="9_gov_state"]
+[ext_resource type="Script" path="res://src/ui/combat_hud_controller.gd" id="10_hud_ctrl"]
+[ext_resource type="Script" path="res://src/ui/dice_visualizer.gd" id="11_dice_vis"]
+[ext_resource type="Script" path="res://src/dj_mode/dj_mode_controller.gd" id="12_dj_ctrl"]
+[ext_resource type="Script" path="res://src/ui/main_menu_controller.gd" id="13_menu_ctrl"]
+
+[node name="MainGame" type="Node2D"]
+script = ExtResource("1_game_mgr")
+
+[node name="GridRenderer" type="Node2D" parent="."]
+script = ExtResource("2_grid_ren")
+
+[node name="PoolManager" type="Node2D" parent="."]
+script = ExtResource("3_pool_mgr")
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
+script = ExtResource("4_state_mach")
+initial_state = NodePath("MainMenuState")
+
+[node name="MainMenuState" type="Node" parent="StateMachine"]
+script = ExtResource("5_menu_state")
+
+[node name="ExplorationState" type="Node" parent="StateMachine"]
+script = ExtResource("6_expl_state")
+
+[node name="CombatState" type="Node" parent="StateMachine"]
+script = ExtResource("7_comb_state")
+
+[node name="DJModeState" type="Node" parent="StateMachine"]
+script = ExtResource("8_dj_state")
+
+[node name="GameOverState" type="Node" parent="StateMachine"]
+script = ExtResource("9_gov_state")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="CombatHUD" type="Control" parent="CanvasLayer"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("10_hud_ctrl")
+
+[node name="DiceVisualizer" type="Control" parent="CanvasLayer"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("11_dice_vis")
+
+[node name="DJModeController" type="Control" parent="CanvasLayer"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("12_dj_ctrl")
+
+[node name="MainMenu" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("13_menu_ctrl")
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer/MainMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0588235, 0.0901961, 0.164706, 1)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/MainMenu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -150.0
+offset_right = 200.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="TitleLabel" type="Label" parent="CanvasLayer/MainMenu/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "CALABOZOS & BUFONES"
+horizontal_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="CanvasLayer/MainMenu/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.701961, 0.701961, 0.701961, 1)
+text = "Un RPG Táctico muy serio"
+horizontal_alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/MainMenu/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 40
+
+[node name="PlayButton" type="Button" parent="CanvasLayer/MainMenu/VBoxContainer/MarginContainer"]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "JUGAR (START)"
+
+[node name="SettingsButton" type="Button" parent="CanvasLayer/MainMenu/VBoxContainer"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "AJUSTES"
+

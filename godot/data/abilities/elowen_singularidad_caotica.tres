@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/ability_data.gd" id="1_ability"]
+
+[resource]
+script = ExtResource("1_ability")
+id = "singularidad_caotica"
+ability_name = "Singularidad Caótica"
+description = "Crea una fisura de 5d6 de daño a un objetivo. Tira 1d20: si sacas 1 a 5, sufres la mitad del daño infligido."
+cost = 4
+required_level = 5
+once_per_combat = false
+target_type = 1
+ability_type = 2
+range_distance = 10
+area_radius = 0
+requires_adjacent_ally = false
+auto_hit = false
+damage_dice_count = 5
+damage_dice_sides = 6
+damage_flat_bonus = 0
+heal_dice_count = 0
+heal_dice_sides = 0
+heal_flat_bonus = 0
+applied_status = 0
+status_duration_turns = 0
+backlash_threshold = 5
+taunt_enemies_in_radius = 0
+animation_effect_name = "chaotic_rift"

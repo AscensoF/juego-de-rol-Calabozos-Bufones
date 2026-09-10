@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/ability_data.gd" id="1_ability"]
+
+[resource]
+script = ExtResource("1_ability")
+id = "grito_desafiante"
+ability_name = "Grito Desafiante"
+description = "Throg emite un rugido atronador. Gana +2 CA y todos los enemigos en un radio de 3 casillas son provocados y forzados a atacarle."
+cost = 3
+required_level = 5
+once_per_combat = false
+target_type = 0
+ability_type = 4
+range_distance = 0
+area_radius = 3
+requires_adjacent_ally = false
+auto_hit = false
+damage_dice_count = 0
+damage_dice_sides = 0
+damage_flat_bonus = 0
+heal_dice_count = 0
+heal_dice_sides = 0
+heal_flat_bonus = 0
+applied_status = 2
+status_duration_turns = 3
+backlash_threshold = 0
+taunt_enemies_in_radius = 3
+animation_effect_name = "roar_taunt"
