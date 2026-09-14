@@ -2,14 +2,14 @@ class_name TacticalGrid
 extends RefCounted
 
 ## Motor lógico y matemático de la cuadrícula táctica (independiente de la vista).
-## Maneja posiciones, pathfinding A* ortogonal y registro de entidades (héroes/enemigos).
+## Maneja posiciones, pathfinding A* ortogonal, cálculo de cobertura y registro de entidades.
 
 const WIDTH = 24
 const HEIGHT = 18
 
 var _cells = {} # Vector2i -> Enums.CellType
-var units_by_pos = {} # Vector2i -> Dictionary (Datos de la unidad)
-var pos_by_unit_id = {} # String (unit_id) -> Vector2i
+var units_by_pos = {} # Vector2i -> Dictionary
+var pos_by_unit_id = {} # String -> Vector2i
 
 func _init():
 	_cells.clear()
@@ -37,6 +37,18 @@ func set_cell_type(pos: Vector2i, type: Enums.CellType) -> void:
 func get_distance(a: Vector2i, b: Vector2i) -> int:
 	return abs(a.x - b.x) + abs(a.y - b.y)
 
+## Comprueba si hay un obstáculo o muro entre el atacante y el defensor que otorgue cobertura (+2 CA)
+func has_diagonal_cover(attacker_pos: Vector2i, target_pos: Vector2i) -> bool:
+	var dx = target_pos.x - attacker_pos.x
+	var dy = target_pos.y - attacker_pos.y
+	# Comprobar esquinas intermedias si el ataque es diagonal
+	if abs(dx) >= 1 and abs(dy) >= 1:
+		var corner_a = Vector2i(attacker_pos.x + sign(dx), attacker_pos.y)
+		var corner_b = Vector2i(attacker_pos.x, attacker_pos.y + sign(dy))
+		if get_cell_type(corner_a) == Enums.CellType.WALL or get_cell_type(corner_b) == Enums.CellType.WALL:
+			return true
+	return false
+
 func get_neighbors(pos: Vector2i) -> Array[Vector2i]:
 	var neighbors: Array[Vector2i] = []
 	var deltas := [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]
@@ -46,7 +58,6 @@ func get_neighbors(pos: Vector2i) -> Array[Vector2i]:
 			neighbors.append(n)
 	return neighbors
 
-## Algoritmo A* para encontrar el camino óptimo sorteando muros y entidades
 func find_path(start: Vector2i, goal: Vector2i, max_distance: int = 999) -> Array[Vector2i]:
 	if not is_walkable(goal, start): return []
 	if start == goal: return [start]
@@ -56,7 +67,6 @@ func find_path(start: Vector2i, goal: Vector2i, max_distance: int = 999) -> Arra
 	var cost_so_far: Dictionary = {start: 0}
 
 	while not frontier.is_empty():
-		# Ordenar por f_score (costo + heurística manhattan)
 		frontier.sort_custom(func(a, b):
 			var f_a = cost_so_far[a] + get_distance(a, goal)
 			var f_b = cost_so_far[b] + get_distance(b, goal)
@@ -81,7 +91,6 @@ func find_path(start: Vector2i, goal: Vector2i, max_distance: int = 999) -> Arra
 	if not came_from.has(goal):
 		return []
 
-	# Reconstruir camino
 	var path: Array[Vector2i] = []
 	var curr = goal
 	while curr != null:
