@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://cb_main_game_scene"]
+[gd_scene load_steps=18 format=3 uid="uid://cb_main_game_scene"]
 
 [ext_resource type="Script" path="res://src/core/game_manager.gd" id="1_game_mgr"]
 [ext_resource type="Script" path="res://src/map/grid_renderer.gd" id="2_grid_ren"]
@@ -13,6 +13,8 @@
 [ext_resource type="Script" path="res://src/ui/dice_visualizer.gd" id="11_dice_vis"]
 [ext_resource type="Script" path="res://src/dj_mode/dj_mode_controller.gd" id="12_dj_ctrl"]
 [ext_resource type="Script" path="res://src/ui/main_menu_controller.gd" id="13_menu_ctrl"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/fondo.jpeg" id="14_bg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/logo.png" id="15_logo"]
 
 [node name="MainGame" type="Node2D"]
 script = ExtResource("1_game_mgr")
@@ -86,14 +88,25 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("13_menu_ctrl")
 
-[node name="ColorRect" type="ColorRect" parent="CanvasLayer/MainMenu"]
+[node name="Background" type="TextureRect" parent="CanvasLayer/MainMenu"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.0588235, 0.0901961, 0.164706, 1)
+texture = ExtResource("14_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Dimmer" type="ColorRect" parent="CanvasLayer/MainMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.05, 0.08, 0.75)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/MainMenu"]
 layout_mode = 1
@@ -102,39 +115,52 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -150.0
-offset_right = 200.0
-offset_bottom = 150.0
+offset_left = -220.0
+offset_top = -240.0
+offset_right = 220.0
+offset_bottom = 240.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 20
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="LogoRect" type="TextureRect" parent="CanvasLayer/MainMenu/VBoxContainer"]
+custom_minimum_size = Vector2(160, 160)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("15_logo")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="TitleLabel" type="Label" parent="CanvasLayer/MainMenu/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 48
-text = "CALABOZOS & BUFONES"
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 36
+text = "THE OLD WORLD TACTICS"
 horizontal_alignment = 1
 
 [node name="SubtitleLabel" type="Label" parent="CanvasLayer/MainMenu/VBoxContainer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.701961, 0.701961, 0.701961, 1)
-text = "Un RPG Táctico muy serio"
+theme_override_colors/font_color = Color(0.8, 0.75, 0.65, 1)
+theme_override_font_sizes/font_size = 14
+text = "Purga la Herejía en Reikland • Edición D20"
 horizontal_alignment = 1
 
-[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/MainMenu/VBoxContainer"]
+[node name="PlayButton" type="Button" parent="CanvasLayer/MainMenu/VBoxContainer"]
+custom_minimum_size = Vector2(280, 56)
 layout_mode = 2
-theme_override_constants/margin_top = 40
-
-[node name="PlayButton" type="Button" parent="CanvasLayer/MainMenu/VBoxContainer/MarginContainer"]
-custom_minimum_size = Vector2(0, 80)
-layout_mode = 2
-theme_override_font_sizes/font_size = 32
-text = "JUGAR (START)"
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
+theme_override_font_sizes/font_size = 20
+text = "⚔️ INICIAR CAMPAÑA"
 
 [node name="SettingsButton" type="Button" parent="CanvasLayer/MainMenu/VBoxContainer"]
-custom_minimum_size = Vector2(0, 60)
+custom_minimum_size = Vector2(240, 46)
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "AJUSTES"
-
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+theme_override_font_sizes/font_size = 16
+text = "📜 CRÓNICAS & AJUSTES"

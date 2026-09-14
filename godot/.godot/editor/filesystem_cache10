@@ -1,5 +1,5 @@
 9cad1ddce9e5a63143ba340c9520626b
-::res://::1789382100
+::res://::1789383800
 export_presets.cfg::TextFile::-1::1789053007::0::1::::<><><>0<>0<><>::
 ::res://assets/::1789051068
 ::res://assets/audio/::1789051068
@@ -84,11 +84,11 @@ defend_command.gd::GDScript::3024487632222727877::1789051558::0::1::::DefendComm
 item_command.gd::GDScript::7347537700286298872::1789051553::0::1::::ItemCommand<>CombatCommand<><>0<>0<><>::
 move_command.gd::GDScript::352982351066319383::1789058327::0::1::::MoveCommand<>CombatCommand<><>0<>0<><>::
 revive_command.gd::GDScript::8696717236679130490::1789051558::0::1::::ReviveCommand<>CombatCommand<><>0<>0<><>::
-::res://src/core/::1789378932
+::res://src/core/::1789382121
 audio_manager.gd::GDScript::2679629398689013934::1789378932::0::1::::<>Node<><>0<>0<><>::
 enums.gd::GDScript::7320779894863568028::1789123545::0::1::::Enums<>RefCounted<><>0<>0<><>::
-event_bus.gd::GDScript::5175827752525067902::1789382033::0::1::::<>Node<><>0<>0<><>::
-game_manager.gd::GDScript::2342261818330476429::1789381291::0::1::::GameManager<>Node2D<><>0<>0<><>::
+event_bus.gd::GDScript::5175827752525067902::1789382111::0::1::::<>Node<><>0<>0<><>::
+game_manager.gd::GDScript::2342261818330476429::1789382121::0::1::::GameManager<>Node2D<><>0<>0<><>::
 tactical_grid.gd::GDScript::7032140065152167793::1789381589::0::1::::TacticalGrid<>RefCounted<><>0<>0<><>::
 ::res://src/data_classes/::1789116983
 ability_data.gd::GDScript::2408194041198213658::1789123461::0::1::::AbilityData<>Resource<><>0<>0<><>::
@@ -127,8 +127,8 @@ dj_mode_state.gd::GDScript::6294948140257241617::1789051327::0::1::::DJModeState
 exploration_state.gd::GDScript::4035091811599087269::1789374714::0::1::::ExplorationState<>State<><>0<>0<><>::
 game_over_state.gd::GDScript::4567540136680376239::1789380437::0::1::::GameOverState<>State<><>0<>0<><>::
 main_menu_state.gd::GDScript::4183432959819545098::1789051306::0::1::::MainMenuState<>State<><>0<>0<><>::
-::res://src/ui/::1789378395
-combat_hud_controller.gd::GDScript::6222478366601570723::1789382054::0::1::::CombatHUDController<>Control<><>0<>0<><>::
+::res://src/ui/::1789382180
+combat_hud_controller.gd::GDScript::6222478366601570723::1789383777::0::1::::CombatHUDController<>Control<><>0<>0<><>::
 dialogue_box.gd::GDScript::8319132859655559540::1789378372::0::1::::DialogueBox<>Control<><>0<>0<><>::
 dice_visualizer.gd::GDScript::2608445091248256499::1789051652::0::1::::DiceVisualizer<>Control<><>0<>0<><>::
 main_menu.tscn::PackedScene::-1::1789058258::0::1::::<><><>0<>0<><>::res://src/core/game_manager.gd<>res://src/map/grid_renderer.gd<>res://src/pooling/pool_manager.gd<>res://src/state_machine/state_machine.gd<>res://src/state_machine/states/main_menu_state.gd<>res://src/state_machine/states/exploration_state.gd<>res://src/state_machine/states/combat_state.gd<>res://src/state_machine/states/dj_mode_state.gd<>res://src/state_machine/states/game_over_state.gd<>res://src/ui/combat_hud_controller.gd<>res://src/ui/dice_visualizer.gd<>res://src/dj_mode/dj_mode_controller.gd<>res://src/ui/main_menu_controller.gd
