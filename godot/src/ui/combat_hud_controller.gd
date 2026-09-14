@@ -28,6 +28,35 @@ var selected_ability: AbilityData = null
 var current_active_unit: Dictionary = {}
 var initiative_list: Array = []
 
+
+static func create_grimdark_panel_style(bg_color: Color = Color(0.08, 0.09, 0.12, 0.88), border_color: Color = Color(0.65, 0.52, 0.28, 0.9), corner_radius: int = 6) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = bg_color
+	sb.border_color = border_color
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(corner_radius)
+	sb.content_margin_left = 10
+	sb.content_margin_right = 10
+	sb.content_margin_top = 6
+	sb.content_margin_bottom = 6
+	sb.shadow_color = Color(0, 0, 0, 0.6)
+	sb.shadow_size = 4
+	return sb
+
+static func create_grimdark_button_style(bg_color: Color = Color(0.14, 0.16, 0.22, 0.92), border_color: Color = Color(0.75, 0.62, 0.35, 0.8), corner_radius: int = 5) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = bg_color
+	sb.border_color = border_color
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(corner_radius)
+	sb.content_margin_left = 8
+	sb.content_margin_right = 8
+	sb.content_margin_top = 4
+	sb.content_margin_bottom = 4
+	sb.shadow_color = Color(0, 0, 0, 0.4)
+	sb.shadow_size = 2
+	return sb
+
 const LOG_COLORS := {
 	"game": Color(0.95, 0.9, 0.75),
 	"info": Color(0.65, 0.85, 1.0),
@@ -51,6 +80,7 @@ func _ready() -> void:
 func _build_top_status_banner() -> void:
 	var panel := PanelContainer.new()
 	panel.name = "StatusBanner"
+	panel.add_theme_stylebox_override("panel", create_grimdark_panel_style(Color(0.06, 0.07, 0.10, 0.92), Color(0.8, 0.65, 0.35, 1.0)))
 	panel.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	panel.offset_left = 220
 	panel.offset_top = 8
@@ -71,6 +101,7 @@ func _build_top_status_banner() -> void:
 func _build_turn_track() -> void:
 	var track_panel := PanelContainer.new()
 	track_panel.name = "TurnTrackPanel"
+	track_panel.add_theme_stylebox_override("panel", create_grimdark_panel_style(Color(0.08, 0.09, 0.12, 0.85), Color(0.6, 0.5, 0.3, 0.7)))
 	track_panel.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	track_panel.offset_left = 220
 	track_panel.offset_top = 50
@@ -88,6 +119,7 @@ func _build_turn_track() -> void:
 func _build_turn_banner_modal() -> void:
 	turn_banner_panel = PanelContainer.new()
 	turn_banner_panel.name = "TurnBanner"
+	turn_banner_panel.add_theme_stylebox_override("panel", create_grimdark_panel_style(Color(0.05, 0.05, 0.08, 0.95), Color(0.9, 0.75, 0.3, 1.0), 10))
 	turn_banner_panel.set_anchors_preset(Control.PRESET_CENTER)
 	turn_banner_panel.custom_minimum_size = Vector2(380, 100)
 	turn_banner_panel.position = Vector2(-190, -150)
@@ -123,6 +155,7 @@ func _build_party_sidebar() -> void:
 func _build_bottom_action_bar() -> void:
 	action_bar = PanelContainer.new()
 	action_bar.name = "ActionBar"
+	action_bar.add_theme_stylebox_override("panel", create_grimdark_panel_style(Color(0.07, 0.08, 0.11, 0.95), Color(0.75, 0.6, 0.3, 0.9), 8))
 	action_bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	action_bar.offset_left = 220
 	action_bar.offset_top = -80
@@ -139,6 +172,7 @@ func _build_bottom_action_bar() -> void:
 func _build_inventory_dock() -> void:
 	inventory_panel = PanelContainer.new()
 	inventory_panel.name = "InventoryDock"
+	inventory_panel.add_theme_stylebox_override("panel", create_grimdark_panel_style(Color(0.06, 0.07, 0.10, 0.95), Color(0.7, 0.55, 0.25, 0.9), 8))
 	inventory_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	inventory_panel.offset_left = 220
 	inventory_panel.offset_top = -140
@@ -156,6 +190,7 @@ func _build_inventory_dock() -> void:
 func _build_compact_combat_log() -> void:
 	var panel := PanelContainer.new()
 	panel.name = "CompactLog"
+	panel.add_theme_stylebox_override("panel", create_grimdark_panel_style(Color(0.05, 0.06, 0.09, 0.9), Color(0.55, 0.45, 0.25, 0.7), 6))
 	panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	panel.position = Vector2(-360, 12)
 	panel.custom_minimum_size = Vector2(348, 120)
@@ -241,8 +276,11 @@ func register_heroes_list(heroes: Array) -> void:
 		var h_hp = h.get("base_hp") if h.get("base_hp") != null else 12
 		
 		var card := Button.new()
-		card.custom_minimum_size = Vector2(195, 46)
+		card.custom_minimum_size = Vector2(195, 48)
 		card.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		card.add_theme_stylebox_override("normal", create_grimdark_button_style(Color(0.1, 0.12, 0.16, 0.9), Color(0.5, 0.4, 0.25, 0.8), 6))
+		card.add_theme_stylebox_override("hover", create_grimdark_button_style(Color(0.16, 0.19, 0.26, 0.95), Color(0.85, 0.7, 0.35, 1.0), 6))
+		card.add_theme_stylebox_override("pressed", create_grimdark_button_style(Color(0.08, 0.09, 0.12, 1.0), Color(1.0, 0.85, 0.3, 1.0), 6))
 		
 		var hbox := HBoxContainer.new()
 		hbox.mouse_filter = MOUSE_FILTER_IGNORE
@@ -352,6 +390,8 @@ func _populate_combat_action_bar(unit: Dictionary) -> void:
 	var atk_btn := Button.new()
 	atk_btn.custom_minimum_size = Vector2(140, 44)
 	atk_btn.text = "⚔️ Ataque Básico"
+	atk_btn.add_theme_stylebox_override("normal", create_grimdark_button_style(Color(0.18, 0.12, 0.12, 0.9), Color(0.8, 0.3, 0.3, 0.8), 6))
+	atk_btn.add_theme_stylebox_override("hover", create_grimdark_button_style(Color(0.25, 0.15, 0.15, 0.95), Color(1.0, 0.45, 0.45, 1.0), 6))
 	atk_btn.add_theme_font_size_override("font_size", 13)
 	atk_btn.pressed.connect(func():
 		selected_ability = null
@@ -398,6 +438,8 @@ func _populate_combat_action_bar(unit: Dictionary) -> void:
 	var pass_btn := Button.new()
 	pass_btn.custom_minimum_size = Vector2(110, 44)
 	pass_btn.text = "⏩ Fin Turno"
+	pass_btn.add_theme_stylebox_override("normal", create_grimdark_button_style(Color(0.12, 0.15, 0.18, 0.9), Color(0.4, 0.6, 0.8, 0.8), 6))
+	pass_btn.add_theme_stylebox_override("hover", create_grimdark_button_style(Color(0.18, 0.22, 0.28, 0.95), Color(0.6, 0.8, 1.0, 1.0), 6))
 	pass_btn.add_theme_font_size_override("font_size", 13)
 	pass_btn.pressed.connect(func():
 		var state_m = get_tree().get_root().get_node_or_null("MainGame/StateMachine")
