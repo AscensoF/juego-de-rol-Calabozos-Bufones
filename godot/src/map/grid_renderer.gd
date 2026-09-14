@@ -17,6 +17,7 @@ var floating_texts: Array = []
 var fog_reveal_times: Dictionary = {}
 var last_fog_reveal_ms: int = 0
 var flash_units: Dictionary = {}
+var unit_offsets: Dictionary = {} # unit_id -> Vector2 (desplazamiento de ataque)
 
 # Paleta Grimdark de Alta Calidad (Piedra esculpida, Barrotes de Forja y Antorchas)
 const COLOR_FLOOR_A := Color(0.14, 0.16, 0.20, 1.0)
@@ -56,6 +57,7 @@ func _subscribe_events() -> void:
 	EventBus.unit_moved.connect(func(_id, _from, _to): queue_redraw())
 	EventBus.floating_text_requested.connect(_on_floating_text_requested)
 	EventBus.health_updated.connect(_on_health_updated_flash)
+		EventBus.attack_resolved.connect(_on_attack_lunge_anim)
 	EventBus.attack_resolved.connect(_on_attack_vfx)
 
 func _on_attack_vfx(_attacker: String, target_name: String, _roll: int, _mod: int, _total: int, _ac: int, is_hit: bool, is_crit: bool, _fumble: bool, damage: int) -> void:
@@ -64,7 +66,7 @@ func _on_attack_vfx(_attacker: String, target_name: String, _roll: int, _mod: in
 	for pos in tactical_grid.units_by_pos:
 		var u = tactical_grid.units_by_pos[pos]
 		if u.get("name") == target_name:
-			var world_pos = grid_to_world(pos) + Vector2(tile_size * 0.5, tile_size * 0.5)
+			var world_pos = grid_to_world(pos) + unit_offsets.get(unit.get("id", ""), Vector2.ZERO) + Vector2(tile_size * 0.5, tile_size * 0.5)
 			CombatVFX.spawn_blood_splatter(self, world_pos, is_crit)
 			break
 
@@ -308,3 +310,29 @@ func _on_dj_cell_painted(type: int, pos: Vector2i) -> void:
 	if tactical_grid:
 		tactical_grid.set_cell_type(pos, type as Enums.CellType)
 		queue_redraw()
+
+func _on_attack_lunge_anim(attacker_name: String, target_name: String, _roll: int, _mod: int, _total: int, _ac: int, _hit: bool, _crit: bool, _fumble: bool, _dmg: int) -> void:
+	if not tactical_grid: return
+	var att_pos := Vector2i(-1, -1)
+	var tgt_pos := Vector2i(-1, -1)
+	var att_id := ""
+	for pos in tactical_grid.units_by_pos:
+		var u = tactical_grid.units_by_pos[pos]
+		if u.get("name") == attacker_name:
+			att_pos = pos
+			att_id = u.get("id", "")
+		elif u.get("name") == target_name:
+			tgt_pos = pos
+	
+	if att_pos != Vector2i(-1, -1) and tgt_pos != Vector2i(-1, -1) and att_id != "":
+		var dir := (Vector2(tgt_pos - att_pos)).normalized() * (tile_size * 0.35)
+		var tw := create_tween()
+		tw.tween_method(func(v: Vector2): 
+			unit_offsets[att_id] = v
+			queue_redraw()
+		, Vector2.ZERO, dir, 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tw.tween_method(func(v: Vector2): 
+			unit_offsets[att_id] = v
+			queue_redraw()
+		, dir, Vector2.ZERO, 0.18).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		tw.tween_callback(func(): unit_offsets.erase(att_id))
