@@ -1,77 +1,72 @@
-# juego-de-rol-Calabozos-Bufones
-# Calabozos & Bufones
+# Calabozos & Bufones (RPG Táctico D20)
 
-*Una aventura de rol táctico de dudosa epicidad.*
+*Una aventura de rol táctico, satírica, data-driven y optimizada para dispositivos móviles (iOS y Android) y escritorio.*
 
-Bienvenido a **Calabozos & Bufones**, un juego de rol táctico por turnos donde la estrategia se encuentra con el humor absurdo. Tras un evento cataclísmico conocido como la "Gran Pifia", la realidad se ha vuelto... inestable. Lidera un equipo de cuatro héroes tan disfuncionales como poderosos a través de una campaña para arreglar el mundo, o al menos para que deje de hacer ruidos raros.
+---
 
-Este proyecto es una aplicación web completa construida con **HTML, CSS y JavaScript puro**, sin necesidad de frameworks, diseñada para ser ejecutada localmente en cualquier navegador moderno.
+## 🎯 Visión y Objetivo del Proyecto
+El objetivo final de este proyecto es su publicación y lanzamiento comercial completo en:
+- **Apple App Store (iOS)**
+- **Google Play Store (Android)**
+- **PC / Mac (Steam / Desktop)**
 
-## Características Principales
+El juego ha evolucionado de su prototipo conceptual web original a una arquitectura nativa, robusta y escalable en **Godot Engine 4.x**, con controles táctiles ergonómicos, rendimiento optimizado para batería y renderizado 2.5D de bajo consumo.
 
--   **Combate Táctico por Turnos:** Mueve a tus héroes en una cuadrícula, planifica tus acciones y utiliza habilidades únicas para derrotar a tus enemigos.
--   **Campaña de 4 Actos:** Sumérgete en una historia hilarante que te llevará desde tabernas ruidosas hasta auditorías infernales.
--   **Clases de Héroe Únicas:** Controla al Guerrero Buldero, la Maga Sarcástica, el Pícaro Bocazas y la Clérigo Irreverente.
--   **Bestiario de los Absurdos:** Enfréntate a enemigos inolvidables como el Goblin Burócrata, el Esqueleto Desmotivado y la temible Sombra del Narrador.
--   **Sistema de Progresión:** Gana experiencia, sube de nivel, mejora tus atributos y gestiona tu inventario.
--   **Sonido y Música Dinámicos:** Una banda sonora original para cada acto y efectos de sonido que dan vida al combate.
--   **Modo Director del Caos (DJ):** ¡Toma el control! Genera mazmorras, invoca enemigos y altera el juego a tu antojo.
+---
 
-## ¿Cómo Jugar? - Instrucciones de Descarga e Instalación
+## ⚔️ Características Principales
 
-Para jugar a **Calabozos & Bufones**, solo necesitas descargar los archivos del juego y abrirlos en tu navegador. ¡No se requiere instalación de software adicional!
+- **Combate Táctico por Turnos D20:** Sistema matemático de dados D20 con impactos, críticos (20 natural), pifias (1) y modificadores de atributos.
+- **Pathfinding A* y Navegación Dinámica:** Cálculo de rutas óptimas ortogonales sorteando muros y entidades con niebla de guerra (*Fog of War*) suave.
+- **Diseño de Interfaz CRPG Clásico (Baldur's Gate / FFVIII / NWN):**
+  - *Party Bar* táctil lateral con retratos vivos de héroes y barras de salud reactivas.
+  - *Action Bar* ergonómica inferior para ataques básicos, habilidades especiales y mochila.
+  - Diálogos cinemáticos satíricos con efecto *Typewriter*.
+- **Arquitectura Data-Driven Desacoplada:** Héroes, monstruos, habilidades, consumibles y actos completamente definidos mediante recursos `.tres`.
+- **Campaña de 4 Actos Satíricos:**
+  1. *Acto 1:* La Taberna del Caos.
+  2. *Acto 2:* Las Catacumbas del Despido Procedente.
+  3. *Acto 3:* La Biblioteca de los Grimorios Burocráticos.
+  4. *Acto 4:* La Confrontación Final con la Sombra del Director.
+- **Banda Sonora Original & SFX:** Pistas de audio ambiental `.ogg` por cada acto gestionadas mediante un `AudioManager` global calibrado.
+- **Modo DJ (Dungeon Master en Vivo):** Panel interactivo para pintar casillas, invocar monstruos sorpresa y alterar el mapa en tiempo real.
 
-### Opción 1: Descargar como ZIP (Recomendado para la mayoría de usuarios)
+---
 
-1.  **Ve a la página principal de este repositorio en GitHub.**
-2.  Haz clic en el botón verde que dice **`< > Code`**.
-3.  En el menú desplegable, selecciona **`Download ZIP`**.
-4.  Una vez descargado, **descomprime el archivo ZIP** en una carpeta de tu elección (por ejemplo, en tu Escritorio o en una carpeta de "Juegos").
-5.  Abre la carpeta descomprimida. Deberías ver una estructura de archivos similar a esta:
-    ```
-    Calabozos-y-Bufones-main/
-    ├── personajes/
-    ├── bso/
-    ├── logo/
-    ├── index.html
-    ├── style.css
-    ├── game.js
-    └── README.md
-    ```
-6.  **Haz doble clic en el archivo `index.html`**. ¡Se abrirá en tu navegador por defecto y el juego comenzará!
+## 🛠️ Estructura del Proyecto (Godot 4.x)
 
-### Opción 2: Clonar el Repositorio (Para desarrolladores con Git)
+```
+juego-de-rol-calabozos-bufones/
+├── godot/                         # Proyecto nativo de Godot Engine 4.x
+│   ├── assets/                    # Sprites, texturas, música (.ogg) y fuentes
+│   ├── data/                      # Recursos .tres (Héroes, Enemigos, Habilidades, Ítems, Actos)
+│   ├── src/                       # Código fuente modular en GDScript
+│   │   ├── combat/                # Reglas D20, comandos de ataque y tiradas
+│   │   ├── core/                  # EventBus, GameManager, TacticalGrid, AudioManager
+│   │   ├── data_classes/          # Definición de clases de recursos (HeroData, EnemyData...)
+│   │   ├── dj_mode/               # Controlador del Modo DJ
+│   │   ├── map/                   # GridRenderer (2.5D, antorchas, sombras), TacticalCamera
+│   │   ├── state_machine/         # StateMachine (MainMenu, Exploration, Combat, GameOver)
+│   │   └── ui/                    # CombatHUDController, DialogueBox, DiceVisualizer
+│   └── project.godot              # Configuración del motor, Autoloads y display
+└── README.md                      # Documentación del proyecto
+```
 
-Si tienes [Git](https://git-scm.com/) instalado, puedes clonar el repositorio directamente.
+---
 
-1.  Abre tu terminal o línea de comandos.
-2.  Navega hasta el directorio donde quieras guardar el juego.
-3.  Ejecuta el siguiente comando:
-    ```bash
-    git clone https://github.com/tu-usuario/tu-repositorio.git
-    ```
-    *(Reemplaza `tu-usuario/tu-repositorio` con la URL real de tu repositorio)*.
-4.  Una vez clonado, navega a la nueva carpeta:
-    ```bash
-    cd tu-repositorio
-    ```
-5.  Abre el archivo `index.html` en tu navegador para jugar.
+## 📱 Roadmap para Publicación Móvil (App Store / Play Store)
 
-## Guía Rápida de Juego
+1. [x] **Core Táctico & Reglas D20:** Héroes, habilidades, tiradas e inventario.
+2. [x] **Pathfinding A* & Niebla de Guerra:** Movimiento animado e iluminación procedural.
+3. [x] **UI/UX Táctil CRPG:** Adaptada a pantallas táctiles y móviles en horizontal (*Landscape*).
+4. [x] **Sistema de Diálogos Satíricos:** Motor cinemático con retratos y textos.
+5. [ ] **Campaña Completa de 4 Actos:** Creación de recursos y encuentros para Actos 2, 3 y 4.
+6. [ ] **Modo DJ Flotante:** Herramienta interactiva de edición en vivo.
+7. [ ] **Export Presets & Safe Area:** Configuración para iOS (Xcode / IPA) y Android (Gradle / APK / AAB) con soporte de *notches* e iconos adaptativos.
 
--   **Menú Principal:** Al iniciar, podrás comenzar una **Nueva Aventura** (con tutorial) o **Continuar** una partida guardada.
--   **Movimiento:** Selecciona un héroe, pulsa el botón "Mover" y haz clic en una de las casillas resaltadas en azul.
--   **Combate:** Cuando veas enemigos, pulsa "Tirar Iniciativa" para empezar el combate por turnos.
--   **Acciones:** En tu turno, cada héroe puede **Mover** y realizar una **Acción Principal** (Atacar, Defender, Usar Habilidad).
--   **Guardar/Cargar:** ¡No te olvides de guardar tu progreso usando los botones en la parte superior del mapa!
+---
 
-## Créditos
+## 👨‍💻 Créditos
+- **Diseño, Dirección y Desarrollo:** Miguel (Ascenso Financiero)
+- **Motor:** Godot Engine 4.x
 
-Este juego fue creado con caos, café y una pasión por los juegos de rol.
-
--   **Diseño y Desarrollo:** [Miguel - Ascenso Financiero]
--   **Tecnologías:** HTML5, CSS3, JavaScript (ES6+), TailwindCSS (vía CDN), Tone.js.
--   **Fuentes:** 'Cinzel' y 'Inter' de Google Fonts.
--   *Agradecimientos especiales a [cualquier persona o recurso que quieras mencionar].*
-
-¡Disfruta de la aventura y que tus pifias sean pocas!
