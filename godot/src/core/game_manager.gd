@@ -12,8 +12,14 @@ var tactical_grid: TacticalGrid
 var combat_invoker: CombatInvoker
 var party_heroes: Array = []
 var act_data: ActData
+var camera: TacticalCamera
+var dialogue_box: DialogueBox
+
+# Inventario compartido del grupo
+var party_inventory: Array[Dictionary] = []
 
 func _ready():
+	RenderingServer.set_default_clear_color(Color(0.04, 0.06, 0.10, 1.0))
 	tactical_grid = TacticalGrid.new()
 	combat_invoker = CombatInvoker.new()
 
@@ -21,9 +27,124 @@ func _ready():
 		grid_renderer.tactical_grid = tactical_grid
 	if hud:
 		hud.combat_invoker = combat_invoker
+		hud.game_manager = self
 
+	_setup_camera()
+	_setup_dialogue_box()
 	_load_campaign_data()
+	_setup_initial_inventory()
 	_setup_initial_board()
+	_subscribe_inventory_events()
+	_trigger_intro_dialogue()
+
+func _setup_camera():
+	camera = TacticalCamera.new()
+	add_child(camera)
+	camera.position = Vector2(400, 300)
+
+func _setup_dialogue_box():
+	dialogue_box = DialogueBox.new()
+	dialogue_box.name = "DialogueBox"
+	$CanvasLayer.add_child(dialogue_box)
+
+func _trigger_intro_dialogue():
+	await get_tree().create_timer(0.5).timeout
+	if not is_inside_tree(): return
+	if EventBus:
+		EventBus.dialogue_requested.emit([
+			{
+				"speaker": "El DJ de la Mazmorra",
+				"text": "¡Bienvenidos a la Taberna del Caos, bufones! La junta directiva exige que limpiéis este calabozo antes de que expire vuestro contrato laboral.",
+				"portrait": "res://assets/sprites/ui/logo.png"
+			},
+			{
+				"speaker": "Throg",
+				"text": "¿Contrato? ¡Throg solo entender que aplastar cráneos resuelve cualquier trámite burocrático!",
+				"portrait": "res://assets/sprites/characters/heroes/throg.png"
+			},
+			{
+				"speaker": "Elowen",
+				"text": "Cálmate, bárbaro. Revisa tu mochila antes de avanzar hacia las sombras... y cuidado con las trampas en el suelo.",
+				"portrait": "res://assets/sprites/characters/heroes/elowen.png"
+			}
+		])
+
+func focus_camera_on(grid_pos: Vector2i, zoom_level: float = 2.0) -> void:
+	if not camera or not grid_renderer: return
+	var world := grid_renderer.grid_to_world(grid_pos) + Vector2(grid_renderer.tile_size * 0.5, grid_renderer.tile_size * 0.5)
+	camera.position = world
+	if zoom_level > 0.0:
+		camera.zoom_target = Vector2(zoom_level, zoom_level)
+
+func _setup_initial_inventory():
+	party_inventory.clear()
+	add_item_to_inventory({
+		"id": "pocion_vida_1",
+		"name": "Poción de Vida",
+		"type": "heal",
+		"value": 8,
+		"icon": "🧪",
+		"desc": "Cura 8 puntos de vida al héroe seleccionado."
+	})
+	add_item_to_inventory({
+		"id": "pocion_furia_1",
+		"name": "Elixir de Furia",
+		"type": "resource",
+		"value": 2,
+		"icon": "⚡",
+		"desc": "Restaura 2 puntos de recurso/furia/maná."
+	})
+
+func add_item_to_inventory(item: Dictionary) -> void:
+	party_inventory.append(item)
+	if EventBus:
+		EventBus.inventory_updated.emit(party_inventory)
+
+func remove_item_from_inventory(item_id: String) -> void:
+	for i in party_inventory.size():
+		if party_inventory[i]["id"] == item_id:
+			party_inventory.remove_at(i)
+			break
+	if EventBus:
+		EventBus.inventory_updated.emit(party_inventory)
+
+func _subscribe_inventory_events() -> void:
+	if not EventBus: return
+	EventBus.item_used.connect(_on_item_used)
+
+func _on_item_used(item_id: String, user_id: String) -> void:
+	var item_dict: Dictionary = {}
+	for it in party_inventory:
+		if it["id"] == item_id:
+			item_dict = it
+			break
+	if item_dict.is_empty(): return
+
+	var unit_pos = tactical_grid.pos_by_unit_id.get(user_id, Vector2i(-1, -1))
+	if unit_pos == Vector2i(-1, -1): return
+	var unit = tactical_grid.get_unit_at(unit_pos)
+	if unit.is_empty(): return
+
+	var u_name = unit.get("name", "Héroe")
+	var it_type = item_dict.get("type", "heal")
+	var it_val = item_dict.get("value", 5)
+
+	if it_type == "heal":
+		var new_hp = mini(unit.get("hp_max", 10), unit.get("hp", 10) + it_val)
+		var delta = new_hp - unit.get("hp", 10)
+		unit["hp"] = new_hp
+		if EventBus:
+			EventBus.health_updated.emit(user_id, new_hp, unit.get("hp_max", 10), delta)
+			EventBus.floating_text_requested.emit("+%d HP" % delta, Color.GREEN, unit_pos)
+			EventBus.combat_log_appended.emit("🧪 %s usa %s y recupera %d HP." % [u_name, item_dict["name"], delta], "heal")
+	elif it_type == "resource":
+		var new_res = mini(unit.get("res_max", 10), unit.get("res", 0) + it_val)
+		unit["res"] = new_res
+		if EventBus:
+			EventBus.floating_text_requested.emit("+%d %s" % [it_val, unit.get("res_name", "Rec")], Color.CYAN, unit_pos)
+			EventBus.combat_log_appended.emit("⚡ %s usa %s y recarga su recurso de combate." % [u_name, item_dict["name"]], "crit")
+
+	remove_item_from_inventory(item_id)
 
 func _load_campaign_data():
 	act_data = load("res://data/acts/act_01_taberna.tres") as ActData
@@ -37,8 +158,7 @@ func _load_campaign_data():
 	if grimble: party_heroes.append(grimble)
 	if beryl: party_heroes.append(beryl)
 	
-	if hud:
-		hud.register_heroes_list(party_heroes)
+	if hud: hud.register_heroes_list(party_heroes)
 
 func _setup_initial_board():
 	var start_positions := [
@@ -49,22 +169,17 @@ func _setup_initial_board():
 	for i in party_heroes.size():
 		var h = party_heroes[i]
 		var pos = start_positions[i]
-		var h_name = h.get("hero_name") if h.get("hero_name") != null else "Hero " + str(i)
-		var h_hp = h.get("base_hp") if h.get("base_hp") != null else 10
-		var h_res = h.get("base_resource") if h.get("base_resource") != null else 10
-		var h_ac = h.get("base_ac") if h.get("base_ac") != null else 10
-		var h_speed = h.get("speed") if h.get("speed") != null else 4
-		
 		var hero_token := {
-			"id": h.resource_path.get_file().get_basename() if h.resource_path else "h" + str(i),
-			"name": h_name,
-			"is_hero": true,
-			"data": h,
-			"hp": h_hp, "hp_max": h_hp,
-			"res": h_res, "res_max": h_res,
-			"ac": h_ac,
-			"speed": h_speed,
-			"buffs": [], "is_alive": true
+			"id": "hero_" + str(i),
+			"name": h.get("hero_name") if h.get("hero_name") != null else "Hero",
+			"is_hero": true, "data": h,
+			"hp": h.get("base_hp") if h.get("base_hp") != null else 10,
+			"hp_max": h.get("base_hp") if h.get("base_hp") != null else 10,
+			"res": h.get("base_resource") if h.get("base_resource") != null else 10,
+			"res_max": h.get("base_resource") if h.get("base_resource") != null else 10,
+			"res_name": h.get("resource_name") if h.get("resource_name") != null else "Furia",
+			"speed": h.get("speed") if h.get("speed") != null else 4,
+			"is_alive": true
 		}
 		tactical_grid.register_unit(hero_token, pos)
 
@@ -74,8 +189,6 @@ func _setup_initial_board():
 	tactical_grid.set_cell_type(Vector2i(14, 4), Enums.CellType.BOOKSHELF)
 
 	var goblin_data = load("res://data/enemies/goblin_burocrata.tres")
-	var esqueleto_data = load("res://data/enemies/esqueleto_desmotivado.tres")
-
 	if goblin_data:
 		tactical_grid.register_unit({
 			"id": "enemy_goblin_1",
@@ -83,23 +196,18 @@ func _setup_initial_board():
 			"is_hero": false, "data": goblin_data,
 			"hp": goblin_data.get("base_hp") if goblin_data.get("base_hp") != null else 5,
 			"hp_max": goblin_data.get("base_hp") if goblin_data.get("base_hp") != null else 5,
-			"ac": goblin_data.get("armor_class") if goblin_data.get("armor_class") != null else 8,
-			"speed": goblin_data.get("speed") if goblin_data.get("speed") != null else 4,
-			"init_bonus": goblin_data.get("initiative_bonus") if goblin_data.get("initiative_bonus") != null else 1,
-			"buffs": [], "is_alive": true
+			"is_alive": true
 		}, Vector2i(12, 8))
 
-	if esqueleto_data:
+	var esq_data = load("res://data/enemies/esqueleto_desmotivado.tres")
+	if esq_data:
 		tactical_grid.register_unit({
 			"id": "enemy_esq_1",
-			"name": esqueleto_data.get("enemy_name") if esqueleto_data.get("enemy_name") != null else "Esqueleto",
-			"is_hero": false, "data": esqueleto_data,
-			"hp": esqueleto_data.get("base_hp") if esqueleto_data.get("base_hp") != null else 6,
-			"hp_max": esqueleto_data.get("base_hp") if esqueleto_data.get("base_hp") != null else 6,
-			"ac": esqueleto_data.get("armor_class") if esqueleto_data.get("armor_class") != null else 10,
-			"speed": esqueleto_data.get("speed") if esqueleto_data.get("speed") != null else 3,
-			"init_bonus": esqueleto_data.get("initiative_bonus") if esqueleto_data.get("initiative_bonus") != null else 0,
-			"buffs": [], "is_alive": true
+			"name": esq_data.get("enemy_name") if esq_data.get("enemy_name") != null else "Esqueleto",
+			"is_hero": false, "data": esq_data,
+			"hp": esq_data.get("base_hp") if esq_data.get("base_hp") != null else 6,
+			"hp_max": esq_data.get("base_hp") if esq_data.get("base_hp") != null else 6,
+			"is_alive": true
 		}, Vector2i(15, 10))
 
 	if EventBus:

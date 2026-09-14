@@ -39,7 +39,8 @@ enum EnemyKind {
 	ORCO_CHISTOSO = 2,
 	MIMICO_EXISTENCIAL = 3,
 	LIMO_NOSTALGIA = 4,
-	REY_ORCO_KARAOKE = 5
+	REY_ORCO_KARAOKE = 5,
+	SOMBRA_NARRADOR = 6
 }
 
 enum HeroClass {
@@ -47,5 +48,19 @@ enum HeroClass {
 	MAGO = 1,
 	PICARO = 2,
 	CLERIGO = 3
+}
+
+enum StatusEffectType {
+	DEFENDING = 0,
+	DIVINE_MIGHT = 1,
+	MELANCHOLY = 2,
+	STUN = 3,
+	INVULNERABLE = 4,
+	GUARANTEED_CRIT = 5,
+	SHARPENED = 6,
+	BLESSED = 7,
+	CURSED = 8,
+	TAUNTED = 9,
+	CONFUSED = 10
 }
 

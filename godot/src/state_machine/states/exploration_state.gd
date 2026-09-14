@@ -1,157 +1,214 @@
 class_name ExplorationState
 extends State
 
-## Estado de Exploración: Cuadrícula 24x18, Niebla de Guerra dinámica, cofres, trampas y eventos.
+## Estado de Exploración: Selección táctil de héroe, pathfinding A*, cálculo de celdas alcanzables, movimiento interactivo y niebla de guerra.
 
 var current_act: ActData
-var party_heroes: Array[HeroData] = []
-var active_enemies: Array[EnemyData] = []
+var party_heroes: Array = []
+var selected_hero_id: String = "hero_0"
 
 const GRID_WIDTH: int = 24
 const GRID_HEIGHT: int = 18
-const VISION_RADIUS: int = 5
+const VISION_RADIUS: int = 6
+
+var is_moving_hero: bool = false
 
 func _init() -> void:
 	state_enum = Enums.GameFlowState.EXPLORATION
 
 func enter(params: Dictionary = {}) -> void:
 	print("ExplorationState: Entrando en fase de Exploración...")
-	if params.has("act"):
-		current_act = params["act"]
 	if params.has("party"):
 		party_heroes = params["party"]
 
 	if EventBus:
-		# Mostramos la UI de combate (HUD) para ver información de héroes y eventos
 		var hud = state_machine.get_parent().get_node_or_null("CanvasLayer/CombatHUD")
-		if hud:
-			hud.show()
-		
-		EventBus.status_panel_updated.emit("Fase de Exploración: Muévete con libertad e interactúa con el entorno.")
-		EventBus.combat_log_appended.emit("Entrando en zona desconocida. La niebla oculta los peligros...", "info")
+		if hud and hud.has_method("show_ui"): hud.show_ui()
 		EventBus.cell_clicked.connect(_on_cell_clicked)
-		EventBus.dj_mode_toggled.connect(_on_dj_mode_toggled)
+
+	# Seleccionar por defecto al primer héroe
+	select_hero(selected_hero_id)
 
 func exit() -> void:
+	if EventBus and EventBus.cell_clicked.is_connected(_on_cell_clicked):
+		EventBus.cell_clicked.disconnect(_on_cell_clicked)
+	_clear_highlights()
+	is_moving_hero = false
+
+func select_hero(hero_id: String) -> void:
+	if is_moving_hero: return
+	selected_hero_id = hero_id
+	var game_manager = state_machine.get_parent()
+	if not game_manager or not game_manager.tactical_grid: return
+	var grid = game_manager.tactical_grid
+	var pos = grid.pos_by_unit_id.get(hero_id, Vector2i(-1, -1))
+	
+	if pos == Vector2i(-1, -1): return
+	var unit = grid.get_unit_at(pos)
+	var h_name = unit.get("name", "Héroe")
+
+	# Actualizar iluminación en el GridRenderer
+	if game_manager.grid_renderer:
+		game_manager.grid_renderer.selected_cell = pos
+		game_manager.grid_renderer.reachable_cells = _get_reachable_cells(pos, unit.get("speed", 4))
+		game_manager.grid_renderer.current_path.clear()
+		game_manager.grid_renderer.queue_redraw()
+
 	if EventBus:
-		if EventBus.cell_clicked.is_connected(_on_cell_clicked):
-			EventBus.cell_clicked.disconnect(_on_cell_clicked)
-		if EventBus.dj_mode_toggled.is_connected(_on_dj_mode_toggled):
-			EventBus.dj_mode_toggled.disconnect(_on_dj_mode_toggled)
+		EventBus.status_panel_updated.emit("Héroe activo: %s. Toca una casilla verde para trazar la ruta." % h_name)
+
+func _clear_highlights() -> void:
+	var game_manager = state_machine.get_parent()
+	if game_manager and game_manager.grid_renderer:
+		game_manager.grid_renderer.selected_cell = Vector2i(-1, -1)
+		game_manager.grid_renderer.reachable_cells.clear()
+		game_manager.grid_renderer.current_path.clear()
+		game_manager.grid_renderer.queue_redraw()
+
+func _get_reachable_cells(start_pos: Vector2i, max_speed: int) -> Array[Vector2i]:
+	var game_manager = state_machine.get_parent()
+	var grid = game_manager.tactical_grid
+	var reachable: Array[Vector2i] = []
+	
+	for dy in range(-max_speed, max_speed + 1):
+		for dx in range(-max_speed, max_speed + 1):
+			var p := Vector2i(start_pos.x + dx, start_pos.y + dy)
+			if p == start_pos: continue
+			if grid.is_in_bounds(p):
+				if grid.get_cell_type(p) != Enums.CellType.WALL:
+					# Comprobar que existe un camino A* válido dentro de la distancia máxima
+					var path = grid.find_path(start_pos, p, max_speed)
+					if path.size() > 1 and (path.size() - 1) <= max_speed:
+						if not grid.units_by_pos.has(p):
+							reachable.append(p)
+	return reachable
 
 func _on_cell_clicked(grid_pos: Vector2i) -> void:
-	# Verificación de límites de la cuadrícula táctica
-	if grid_pos.x < 0 or grid_pos.x >= GRID_WIDTH or grid_pos.y < 0 or grid_pos.y >= GRID_HEIGHT:
+	if is_moving_hero: return
+	if grid_pos.x < 0 or grid_pos.x >= GRID_WIDTH or grid_pos.y < 0 or grid_pos.y >= GRID_HEIGHT: return
+
+	var game_manager = state_machine.get_parent()
+	if not game_manager or not game_manager.tactical_grid: return
+	var grid = game_manager.tactical_grid
+
+	# 1. ¿Tocó a otra unidad/héroe?
+	var clicked_unit = grid.get_unit_at(grid_pos)
+	if not clicked_unit.is_empty():
+		if clicked_unit.get("is_hero", false):
+			select_hero(clicked_unit["id"])
+			return
+
+	# 2. Mover al héroe seleccionado actualmente a través del camino A*
+	var current_pos = grid.pos_by_unit_id.get(selected_hero_id, Vector2i(-1, -1))
+	if current_pos == Vector2i(-1, -1): return
+	
+	var unit = grid.get_unit_at(current_pos)
+	var max_speed = unit.get("speed", 4)
+
+	if grid.get_cell_type(grid_pos) == Enums.CellType.WALL:
+		EventBus.combat_log_appended.emit("El camino está bloqueado por un muro.", "info")
 		return
 
-	print("ExplorationState: Clic en celda ", grid_pos)
-	
-	# 1. Revelación de niebla alrededor de la nueva posición
-	reveal_fog_around(grid_pos, VISION_RADIUS)
-	
-	# 2. Mover un héroe seleccionado a esa celda (simularemos mover el primer héroe por ahora)
+	var path = grid.find_path(current_pos, grid_pos, max_speed)
+	if path.size() > 1 and (path.size() - 1) <= max_speed and not grid.units_by_pos.has(grid_pos):
+		_execute_hero_path(path, unit)
+
+func _execute_hero_path(path: Array[Vector2i], unit: Dictionary) -> void:
+	is_moving_hero = true
 	var game_manager = state_machine.get_parent()
-	if game_manager and game_manager.tactical_grid:
-		var grid = game_manager.tactical_grid
-		# Buscamos la posición actual de nuestro primer héroe (Throg)
-		for pos in grid.units_by_pos:
-			var unit = grid.units_by_pos[pos]
-			if unit.get("is_hero") == true:
-				# Calculamos si está al alcance de un movimiento simple (heurística básica)
-				var dist = grid.get_distance(pos, grid_pos)
-				if dist <= unit.get("speed", 4):
-					grid.move_unit(pos, grid_pos)
-					print("Movido héroe a ", grid_pos)
-					# Comprobamos interacciones en la nueva celda
-					_check_cell_interaction(grid_pos, unit)
-					# Y comprobamos si hemos revelado enemigos
-					check_enemy_encounter()
-					break
+	var grid = game_manager.tactical_grid
+	
+	var current_step_pos = path[0]
+	for i in range(1, path.size()):
+		var next_pos = path[i]
+		grid.move_unit(current_step_pos, next_pos)
+		reveal_fog_around(next_pos, VISION_RADIUS)
+		EventBus.unit_moved.emit(selected_hero_id, current_step_pos, next_pos)
+		current_step_pos = next_pos
+		await get_tree().create_timer(0.08).timeout
+		if not is_inside_tree(): return
+
+	var final_pos = path[-1]
+	_check_cell_interaction(final_pos, unit)
+	is_moving_hero = false
+	select_hero(selected_hero_id)
+	_check_for_combat(final_pos)
 
 func _check_cell_interaction(pos: Vector2i, unit: Dictionary) -> void:
 	var game_manager = state_machine.get_parent()
 	if not game_manager or not game_manager.tactical_grid: return
-	
-	var cell_type = game_manager.tactical_grid.get_cell_type(pos)
-	var hero_name = unit.get("name", "Héroe")
+	var grid = game_manager.tactical_grid
+	var cell_type = grid.get_cell_type(pos)
+	var h_name = unit.get("name", "Héroe")
+	var u_id = unit.get("id", "hero_0")
 	
 	match cell_type:
 		Enums.CellType.TRAP:
-			trigger_trap(hero_name, pos)
+			var dmg: int = (randi() % 6) + 1
+			unit["hp"] = maxi(0, unit.get("hp", 10) - dmg)
+			grid.set_cell_type(pos, Enums.CellType.FLOOR)
+			if EventBus:
+				EventBus.health_updated.emit(u_id, unit["hp"], unit.get("hp_max", 10), -dmg)
+				EventBus.floating_text_requested.emit("-%d Trampa" % dmg, Color.CORAL, pos)
+				EventBus.combat_log_appended.emit("¡%s pisó una trampa oculta y sufrió %d de daño!" % [h_name, dmg], "damage")
+
 		Enums.CellType.CHEST:
-			# Creamos un item temporal para simular el loot
-			var dummy_item = ItemData.new()
-			dummy_item.item_name = "Poción Misteriosa"
-			interact_with_chest(hero_name, dummy_item, pos)
+			grid.set_cell_type(pos, Enums.CellType.FLOOR)
+			if EventBus:
+				EventBus.floating_text_requested.emit("+1 Poción de Vida", Color.GOLD, pos)
+				EventBus.combat_log_appended.emit("¡%s abrió un cofre misterioso y encontró una Poción de Curación!" % h_name, "heal")
+
 		Enums.CellType.ALTAR:
-			interact_with_altar()
+			grid.set_cell_type(pos, Enums.CellType.FLOOR)
+			for p in grid.units_by_pos:
+				var u = grid.units_by_pos[p]
+				if u.get("is_hero", false) and u.get("is_alive", false):
+					var heal: int = (randi() % 8) + 5
+					u["hp"] = mini(u.get("hp_max", 10), u.get("hp", 10) + heal)
+					if EventBus:
+						EventBus.health_updated.emit(u.get("id", ""), u["hp"], u.get("hp_max", 10), heal)
+						EventBus.floating_text_requested.emit("+%d HP" % heal, Color.GREEN, p)
+			if EventBus:
+				EventBus.combat_log_appended.emit("¡%s reza en el Altar Antiguo! Una luz celestial sana a todo el grupo." % h_name, "heal")
+
 		Enums.CellType.BOOKSHELF:
-			interact_with_bookshelf()
+			grid.set_cell_type(pos, Enums.CellType.FLOOR)
+			if EventBus:
+				EventBus.floating_text_requested.emit("+15 XP", Color.CYAN, pos)
+				EventBus.combat_log_appended.emit("¡%s examina la Librería Olvidada y descubre un tomo arcano! (+15 XP)" % h_name, "crit")
 
-func reveal_fog_around(center: Vector2i, radius: int) -> void:
-	if EventBus:
-		EventBus.tile_revealed.emit(center, radius)
-
-func trigger_trap(hero_name: String, pos: Vector2i) -> void:
-	var damage: int = (randi() % 6) + 1 # 1d6 de daño por trampa
-	if EventBus:
-		EventBus.trap_triggered.emit(hero_name, damage, pos)
-		EventBus.floating_text_requested.emit("-%d" % damage, Color.RED, pos)
-		EventBus.combat_log_appended.emit("¡%s ha pisado una trampa oculta y sufre %d de daño!" % [hero_name, damage], "damage")
-
-func interact_with_chest(hero_name: String, item: ItemData, pos: Vector2i) -> void:
-	if EventBus:
-		EventBus.chest_opened.emit(hero_name, item, pos)
-		EventBus.combat_log_appended.emit("%s abre un cofre y encuentra: %s." % [hero_name, item.item_name], "heal")
-
-func interact_with_altar() -> void:
-	var dialogs := [
-		"El altar de piedra está dedicado a una deidad menor del 'Caos Organizado'. Sientes propósito y confusión.",
-		"Una inscripción reza: 'Por favor, no dejar ofrendas. El conserje está de vacaciones'. Dejas una moneda por si acaso.",
-		"Al tocar el altar, una voz resuena: 'Hemos intentado contactarle acerca de la garantía extendida de su alma...'"
-	]
-	var chosen: String = dialogs[randi() % dialogs.size()]
-	if EventBus:
-		EventBus.altar_interacted.emit(chosen)
-		EventBus.combat_log_appended.emit("[Altar] %s" % chosen, "info")
-
-func interact_with_bookshelf() -> void:
-	var dialogs := [
-		"Encuentras manuales incomprensibles. Uno se titula: 'Cómo Fingir que Entiendes la Magia'.",
-		"Libro de cocina: 'Estofado de Limo Nostálgico'. Promete sabor a infancia y arrepentimiento.",
-		"Un tomo polvoriento se titula: 'Y entonces, todo salió terriblemente mal'."
-	]
-	var chosen: String = dialogs[randi() % dialogs.size()]
-	if EventBus:
-		EventBus.bookshelf_interacted.emit(chosen)
-		EventBus.combat_log_appended.emit("[Librería] %s" % chosen, "info")
-
-func check_enemy_encounter() -> void:
-	# Simulación simple: si hay un enemigo cerca del héroe, entramos en combate.
+func _check_for_combat(hero_pos: Vector2i) -> void:
 	var game_manager = state_machine.get_parent()
 	if not game_manager or not game_manager.tactical_grid: return
-	
 	var grid = game_manager.tactical_grid
-	var enemies_in_sight = []
-	var heroes = []
-	
+
+	var nearby_enemy: Dictionary = {}
+	var trigger: bool = false
 	for pos in grid.units_by_pos:
 		var unit = grid.units_by_pos[pos]
-		if unit.get("is_hero") == true:
-			heroes.append(unit.get("data"))
-		else:
-			# Si el enemigo ya está revelado (sin niebla)
-			if not game_manager.grid_renderer.fog_matrix.get(pos, true):
-				enemies_in_sight.append(unit.get("data"))
-	
-	if enemies_in_sight.size() > 0:
-		print("ExplorationState: Enemigo a la vista. ¡Iniciando Combate!")
-		state_machine.change_state(Enums.GameFlowState.COMBAT, {
-			"enemies": enemies_in_sight,
-			"heroes": heroes
-		})
+		if unit.get("is_hero", false): continue
+		if not unit.get("is_alive", false): continue
+		if grid.get_distance(hero_pos, pos) <= 2:
+			trigger = true
+			nearby_enemy = unit
+			break
 
-func _on_dj_mode_toggled(is_active: bool) -> void:
-	if is_active:
-		state_machine.change_state(Enums.GameFlowState.DJ_MODE)
+	if not trigger: return
+
+	var heroes: Array = []
+	var enemies: Array = []
+	for pos in grid.units_by_pos:
+		var unit = grid.units_by_pos[pos]
+		if unit.get("data") == null: continue
+		if unit.get("is_hero", false):
+			heroes.append({"data": unit["data"], "pos": pos})
+		else:
+			enemies.append({"data": unit["data"], "pos": pos})
+
+	print("ExplorationState: ¡Enemigo a la vista! Iniciando combate...")
+	EventBus.combat_log_appended.emit("¡%s os ha detectado! ¡A las armas!" % nearby_enemy.get("name", "El enemigo"), "crit")
+	state_machine.change_state(Enums.GameFlowState.COMBAT, {"heroes": heroes, "enemies": enemies})
+
+func reveal_fog_around(center: Vector2i, radius: int) -> void:
+	if EventBus: EventBus.tile_revealed.emit(center, radius)
 

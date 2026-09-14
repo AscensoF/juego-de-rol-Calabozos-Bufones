@@ -2,7 +2,7 @@ class_name TacticalGrid
 extends RefCounted
 
 ## Motor lógico y matemático de la cuadrícula táctica (independiente de la vista).
-## Maneja posiciones, pathfinding básico (Manhattan/BFS) y registro de entidades (héroes/enemigos).
+## Maneja posiciones, pathfinding A* ortogonal y registro de entidades (héroes/enemigos).
 
 const WIDTH = 24
 const HEIGHT = 18
@@ -19,6 +19,14 @@ func _init():
 func is_in_bounds(pos: Vector2i) -> bool:
 	return pos.x >= 0 and pos.x < WIDTH and pos.y >= 0 and pos.y < HEIGHT
 
+func is_walkable(pos: Vector2i, ignore_unit_at: Vector2i = Vector2i(-1, -1)) -> bool:
+	if not is_in_bounds(pos): return false
+	if get_cell_type(pos) == Enums.CellType.WALL: return false
+	if units_by_pos.has(pos) and pos != ignore_unit_at:
+		var unit = units_by_pos[pos]
+		if unit.get("is_alive", true): return false
+	return true
+
 func get_cell_type(pos: Vector2i) -> Enums.CellType:
 	return _cells.get(pos, Enums.CellType.FLOOR)
 
@@ -27,8 +35,60 @@ func set_cell_type(pos: Vector2i, type: Enums.CellType) -> void:
 		_cells[pos] = type
 
 func get_distance(a: Vector2i, b: Vector2i) -> int:
-	# Distancia de Manhattan (ideal para grids ortogonales sin diagonales gratis)
 	return abs(a.x - b.x) + abs(a.y - b.y)
+
+func get_neighbors(pos: Vector2i) -> Array[Vector2i]:
+	var neighbors: Array[Vector2i] = []
+	var deltas := [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]
+	for d in deltas:
+		var n = pos + d
+		if is_in_bounds(n):
+			neighbors.append(n)
+	return neighbors
+
+## Algoritmo A* para encontrar el camino óptimo sorteando muros y entidades
+func find_path(start: Vector2i, goal: Vector2i, max_distance: int = 999) -> Array[Vector2i]:
+	if not is_walkable(goal, start): return []
+	if start == goal: return [start]
+
+	var frontier: Array[Vector2i] = [start]
+	var came_from: Dictionary = {start: null}
+	var cost_so_far: Dictionary = {start: 0}
+
+	while not frontier.is_empty():
+		# Ordenar por f_score (costo + heurística manhattan)
+		frontier.sort_custom(func(a, b):
+			var f_a = cost_so_far[a] + get_distance(a, goal)
+			var f_b = cost_so_far[b] + get_distance(b, goal)
+			return f_a < f_b
+		)
+		var current = frontier.pop_front()
+
+		if current == goal:
+			break
+
+		for next in get_neighbors(current):
+			if not is_walkable(next, start) and next != goal:
+				continue
+			var new_cost = cost_so_far[current] + 1
+			if new_cost > max_distance:
+				continue
+			if not cost_so_far.has(next) or new_cost < cost_so_far[next]:
+				cost_so_far[next] = new_cost
+				came_from[next] = current
+				frontier.append(next)
+
+	if not came_from.has(goal):
+		return []
+
+	# Reconstruir camino
+	var path: Array[Vector2i] = []
+	var curr = goal
+	while curr != null:
+		path.append(curr)
+		curr = came_from[curr]
+	path.reverse()
+	return path
 
 func register_unit(unit_data: Dictionary, pos: Vector2i) -> void:
 	if not is_in_bounds(pos):
@@ -37,7 +97,6 @@ func register_unit(unit_data: Dictionary, pos: Vector2i) -> void:
 	var u_id = unit_data.get("id")
 	if u_id == null: return
 	
-	# Limpiar posición anterior si existe
 	if pos_by_unit_id.has(u_id):
 		var old_pos = pos_by_unit_id[u_id]
 		units_by_pos.erase(old_pos)
@@ -49,7 +108,7 @@ func move_unit(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 	if not units_by_pos.has(from_pos): return false
 	if not is_in_bounds(to_pos): return false
 	if get_cell_type(to_pos) == Enums.CellType.WALL: return false
-	if units_by_pos.has(to_pos): return false # Celda ocupada por otra unidad
+	if units_by_pos.has(to_pos) and to_pos != from_pos: return false
 	
 	var unit = units_by_pos[from_pos]
 	var u_id = unit["id"]

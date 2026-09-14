@@ -25,6 +25,7 @@ boot_splash/image="res://assets/sprites/ui/logo.png"
 [autoload]
 
 EventBus="*res://src/core/event_bus.gd"
+AudioManager="*res://src/core/audio_manager.gd"
 
 [display]
 

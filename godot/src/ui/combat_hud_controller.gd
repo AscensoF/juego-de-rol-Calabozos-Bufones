@@ -1,11 +1,360 @@
 class_name CombatHUDController
 extends Control
 
-var combat_invoker
+## HUD de combate y exploración al estilo Baldur's Gate / Neverwinter Nights / FFVIII:
+## - Barra lateral con retratos vivos de héroes (Party Bar con click para seleccionar).
+## - Consola de Acción inferior estilizada con iconos y marcos RPG dorados.
+## - Panel de estado cinemático e inventario integrado.
 
-func _ready():
-	print("CombatHUDController: Listo")
+var combat_invoker: CombatInvoker
+var game_manager: GameManager
+var status_label: Label
+var log_richtext: RichTextLabel
+var heroes_bar: VBoxContainer
+var action_bar: PanelContainer
+var abilities_container: HBoxContainer
+var inventory_panel: PanelContainer
+var inventory_container: HBoxContainer
 
-func register_heroes_list(heroes: Array):
-	print("CombatHUDController: Héroes registrados en UI")
+var hero_cards: Dictionary = {} # id -> PanelContainer/Button
+var selected_ability: AbilityData = null
+var current_active_unit: Dictionary = {}
+
+const LOG_COLORS := {
+	"game": Color(0.95, 0.9, 0.75),
+	"info": Color(0.65, 0.85, 1.0),
+	"damage": Color(1.0, 0.4, 0.4),
+	"crit": Color(1.0, 0.85, 0.2),
+	"heal": Color(0.4, 0.95, 0.5),
+}
+
+func _ready() -> void:
+	print("CombatHUDController: Construyendo UI estilo Baldur's Gate / FFVIII...")
+	mouse_filter = MOUSE_FILTER_IGNORE
+	_build_top_status_banner()
+	_build_party_sidebar()
+	_build_bottom_action_bar()
+	_build_inventory_dock()
+	_build_compact_combat_log()
+	_connect_events()
+
+func _build_top_status_banner() -> void:
+	var panel := PanelContainer.new()
+	panel.name = "StatusBanner"
+	panel.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	panel.offset_left = 220
+	panel.offset_top = 8
+	panel.offset_right = -220
+	panel.offset_bottom = 44
+	panel.mouse_filter = MOUSE_FILTER_IGNORE
+	add_child(panel)
+
+	status_label = Label.new()
+	status_label.name = "StatusLabel"
+	status_label.add_theme_font_size_override("font_size", 16)
+	status_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.7))
+	status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	status_label.mouse_filter = MOUSE_FILTER_IGNORE
+	panel.add_child(status_label)
+	status_label.text = "Calabozos & Bufones"
+
+func _build_party_sidebar() -> void:
+	heroes_bar = VBoxContainer.new()
+	heroes_bar.name = "PartySideBar"
+	heroes_bar.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	heroes_bar.position = Vector2(12, 12)
+	heroes_bar.custom_minimum_size = Vector2(210, 0)
+	heroes_bar.add_theme_constant_override("separation", 8)
+	add_child(heroes_bar)
+
+func _build_bottom_action_bar() -> void:
+	action_bar = PanelContainer.new()
+	action_bar.name = "ActionBar"
+	action_bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	action_bar.offset_left = 230
+	action_bar.offset_top = -80
+	action_bar.offset_right = -12
+	action_bar.offset_bottom = -12
+	add_child(action_bar)
+
+	abilities_container = HBoxContainer.new()
+	abilities_container.name = "AbilitiesContainer"
+	abilities_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	abilities_container.add_theme_constant_override("separation", 10)
+	action_bar.add_child(abilities_container)
+
+func _build_inventory_dock() -> void:
+	inventory_panel = PanelContainer.new()
+	inventory_panel.name = "InventoryDock"
+	inventory_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	inventory_panel.offset_left = 230
+	inventory_panel.offset_top = -140
+	inventory_panel.offset_right = -12
+	inventory_panel.offset_bottom = -88
+	inventory_panel.visible = false
+	add_child(inventory_panel)
+
+	inventory_container = HBoxContainer.new()
+	inventory_container.name = "InventoryContainer"
+	inventory_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	inventory_container.add_theme_constant_override("separation", 8)
+	inventory_panel.add_child(inventory_container)
+
+func _build_compact_combat_log() -> void:
+	var panel := PanelContainer.new()
+	panel.name = "CompactLog"
+	panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	panel.position = Vector2(-360, 12)
+	panel.custom_minimum_size = Vector2(348, 120)
+	panel.mouse_filter = MOUSE_FILTER_IGNORE
+	add_child(panel)
+
+	log_richtext = RichTextLabel.new()
+	log_richtext.name = "LogText"
+	log_richtext.bbcode_enabled = true
+	log_richtext.scroll_following = true
+	log_richtext.add_theme_font_size_override("normal_font_size", 13)
+	log_richtext.mouse_filter = MOUSE_FILTER_IGNORE
+	panel.add_child(log_richtext)
+
+func _connect_events() -> void:
+	if not EventBus: return
+	EventBus.status_panel_updated.connect(_on_status_updated)
+	EventBus.combat_log_appended.connect(_on_log_appended)
+	EventBus.health_updated.connect(_on_health_updated)
+	EventBus.turn_started.connect(_on_turn_started)
+	EventBus.inventory_updated.connect(_on_inventory_updated)
+	EventBus.combat_ended.connect(func(_v): _build_exploration_action_bar())
+
+func show_ui() -> void:
+	visible = true
+
+func register_heroes_list(heroes: Array) -> void:
+	for child in heroes_bar.get_children():
+		child.queue_free()
+	hero_cards.clear()
+
+	for i in heroes.size():
+		var h = heroes[i]
+		if h == null: continue
+		var hero_id := "hero_" + str(i)
+		var h_name = h.get("hero_name") if h.get("hero_name") != null else "Héroe"
+		var h_hp = h.get("base_hp") if h.get("base_hp") != null else 10
+		
+		var card := Button.new()
+		card.custom_minimum_size = Vector2(200, 48)
+		card.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		
+		var hbox := HBoxContainer.new()
+		hbox.mouse_filter = MOUSE_FILTER_IGNORE
+		hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+		hbox.add_theme_constant_override("separation", 10)
+		card.add_child(hbox)
+		
+		# Retrato mini
+		var icon := TextureRect.new()
+		icon.custom_minimum_size = Vector2(36, 36)
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.mouse_filter = MOUSE_FILTER_IGNORE
+		var p_path := _get_hero_portrait(h_name)
+		if ResourceLoader.exists(p_path):
+			icon.texture = load(p_path)
+		hbox.add_child(icon)
+		
+		# Info de HP y Nombre
+		var vbox := VBoxContainer.new()
+		vbox.mouse_filter = MOUSE_FILTER_IGNORE
+		vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+		
+		var name_lbl := Label.new()
+		name_lbl.text = h_name
+		name_lbl.add_theme_font_size_override("font_size", 14)
+		name_lbl.add_theme_color_override("font_color", Color.GOLD)
+		vbox.add_child(name_lbl)
+		
+		var hp_lbl := Label.new()
+		hp_lbl.name = "HPLabel"
+		hp_lbl.text = "❤ %d/%d" % [h_hp, h_hp]
+		hp_lbl.add_theme_font_size_override("font_size", 12)
+		hp_lbl.add_theme_color_override("font_color", Color(0.4, 0.9, 0.5))
+		vbox.add_child(hp_lbl)
+		hbox.add_child(vbox)
+		
+		# Al tocar el retrato del héroe, se selecciona de inmediato
+		card.pressed.connect(func():
+			var state_m = get_tree().get_root().get_node_or_null("MainGame/StateMachine")
+			if state_m and state_m.has_node("ExplorationState"):
+				state_m.get_node("ExplorationState").select_hero(hero_id)
+		)
+		
+		heroes_bar.add_child(card)
+		hero_cards[hero_id] = card
+
+	_build_exploration_action_bar()
+
+func _get_hero_portrait(hero_name: String) -> String:
+	var s = hero_name.to_lower()
+	if "throg" in s: return "res://assets/sprites/characters/heroes/throg.png"
+	elif "elowen" in s: return "res://assets/sprites/characters/heroes/elowen.png"
+	elif "grimble" in s: return "res://assets/sprites/characters/heroes/grimble.png"
+	elif "beryl" in s: return "res://assets/sprites/characters/heroes/beryl.png"
+	return "res://assets/sprites/ui/logo.png"
+
+func _build_exploration_action_bar() -> void:
+	for child in abilities_container.get_children():
+		child.queue_free()
+
+	var exp_lbl := Label.new()
+	exp_lbl.text = "🗺️ Exploración: Toca un héroe o casilla para avanzar"
+	exp_lbl.add_theme_font_size_override("font_size", 14)
+	abilities_container.add_child(exp_lbl)
+
+	var bag_btn := Button.new()
+	bag_btn.text = "🎒 Mochila del Grupo"
+	bag_btn.custom_minimum_size = Vector2(170, 42)
+	bag_btn.pressed.connect(func():
+		inventory_panel.visible = not inventory_panel.visible
+		if inventory_panel.visible: _render_inventory_items()
+	)
+	abilities_container.add_child(bag_btn)
+
+func _on_turn_started(unit: Dictionary) -> void:
+	selected_ability = null
+	current_active_unit = unit
+	if unit.get("is_hero", false) and unit.get("is_alive", false):
+		_populate_combat_action_bar(unit)
+		inventory_panel.visible = false
+		_highlight_hero_card(unit.get("id", ""))
+	else:
+		_populate_enemy_turn_bar(unit)
+
+func _highlight_hero_card(active_id: String) -> void:
+	for uid in hero_cards:
+		var card: Button = hero_cards[uid]
+		if uid == active_id:
+			card.add_theme_color_override("font_color", Color.GOLD)
+		else:
+			card.remove_theme_color_override("font_color")
+
+func _populate_enemy_turn_bar(unit: Dictionary) -> void:
+	for child in abilities_container.get_children():
+		child.queue_free()
+	var lbl := Label.new()
+	lbl.text = "⚔️ Turno de %s (Pensando táctica...)" % unit.get("name", "Enemigo")
+	lbl.add_theme_font_size_override("font_size", 15)
+	lbl.add_theme_color_override("font_color", Color.CORAL)
+	abilities_container.add_child(lbl)
+
+func _populate_combat_action_bar(unit: Dictionary) -> void:
+	for child in abilities_container.get_children():
+		child.queue_free()
+
+	# 1. Ataque Básico
+	var atk_btn := Button.new()
+	atk_btn.custom_minimum_size = Vector2(150, 44)
+	atk_btn.text = "⚔️ Ataque Básico"
+	atk_btn.add_theme_font_size_override("font_size", 14)
+	atk_btn.pressed.connect(func():
+		selected_ability = null
+		_highlight_ability_button(atk_btn)
+		if EventBus: EventBus.status_panel_updated.emit("⚔️ Ataque Básico: Toca a un enemigo para golpear.")
+	)
+	abilities_container.add_child(atk_btn)
+	_highlight_ability_button(atk_btn)
+
+	# 2. Habilidades Especiales del Héroe
+	var h_data = unit.get("data")
+	if h_data and h_data.get("abilities"):
+		for ab in h_data.abilities:
+			if ab == null or not (ab is AbilityData): continue
+			var btn := Button.new()
+			btn.custom_minimum_size = Vector2(170, 44)
+			var cost_text = " (%d %s)" % [ab.cost, unit.get("res_name", "Rec")] if ab.cost > 0 else ""
+			btn.text = "✨ " + ab.ability_name + cost_text
+			btn.add_theme_font_size_override("font_size", 13)
+			
+			if unit.get("res", 0) < ab.cost:
+				btn.disabled = true
+				btn.modulate = Color(0.6, 0.6, 0.6, 0.6)
+			
+			btn.pressed.connect(func():
+				selected_ability = ab
+				_highlight_ability_button(btn)
+				if EventBus: EventBus.status_panel_updated.emit("✨ Habilidad: %s. Toca objetivo." % ab.ability_name)
+			)
+			abilities_container.add_child(btn)
+
+	# 3. Bolsa / Mochila
+	var bag_btn := Button.new()
+	bag_btn.custom_minimum_size = Vector2(130, 44)
+	bag_btn.text = "🎒 Mochila"
+	bag_btn.add_theme_font_size_override("font_size", 14)
+	bag_btn.pressed.connect(func():
+		inventory_panel.visible = not inventory_panel.visible
+		if inventory_panel.visible: _render_inventory_items()
+	)
+	abilities_container.add_child(bag_btn)
+
+func _render_inventory_items() -> void:
+	for child in inventory_container.get_children():
+		child.queue_free()
+
+	if not game_manager or game_manager.party_inventory.is_empty():
+		var empty_lbl := Label.new()
+		empty_lbl.text = "Mochila vacía"
+		empty_lbl.add_theme_font_size_override("font_size", 13)
+		inventory_container.add_child(empty_lbl)
+		return
+
+	for it in game_manager.party_inventory:
+		var item_btn := Button.new()
+		item_btn.text = "%s %s" % [it.get("icon", "📦"), it.get("name", "Objeto")]
+		item_btn.custom_minimum_size = Vector2(150, 36)
+		var it_id: String = it.get("id", "")
+		item_btn.pressed.connect(func():
+			var uid = current_active_unit.get("id", "hero_0")
+			if EventBus: EventBus.item_used.emit(it_id, uid)
+			_render_inventory_items()
+		)
+		inventory_container.add_child(item_btn)
+
+func _on_inventory_updated(_items: Array) -> void:
+	if inventory_panel and inventory_panel.visible:
+		_render_inventory_items()
+
+func _highlight_ability_button(active_btn: Button) -> void:
+	for btn in abilities_container.get_children():
+		if btn is Button and btn.text != "🎒 Mochila":
+			if btn == active_btn:
+				btn.add_theme_color_override("font_color", Color.GOLD)
+			else:
+				btn.remove_theme_color_override("font_color")
+
+func _on_status_updated(text: String) -> void:
+	if status_label: status_label.text = text
+
+func _on_log_appended(text: String, type: String) -> void:
+	if not log_richtext: return
+	var color: Color = LOG_COLORS.get(type, Color(0.85, 0.85, 0.85))
+	var hex := "#%s%s%s" % [
+		"%02x" % int(color.r * 255),
+		"%02x" % int(color.g * 255),
+		"%02x" % int(color.b * 255)
+	]
+	log_richtext.append_text("[color=%s]%s[/color]\n" % [hex, text])
+
+func _on_health_updated(unit_id: String, hp: int, hp_max: int, _delta: int) -> void:
+	if not hero_cards.has(unit_id): return
+	var card: Button = hero_cards[unit_id]
+	var hp_lbl: Label = card.find_child("HPLabel", true, false)
+	if hp_lbl:
+		hp_lbl.text = "❤ %d/%d" % [hp, hp_max]
+		var ratio: float = float(hp) / float(max(hp_max, 1))
+		if ratio > 0.5:
+			hp_lbl.add_theme_color_override("font_color", Color(0.4, 0.9, 0.5))
+		elif ratio > 0.2:
+			hp_lbl.add_theme_color_override("font_color", Color(1.0, 0.8, 0.3))
+		else:
+			hp_lbl.add_theme_color_override("font_color", Color(1.0, 0.4, 0.4))
 
