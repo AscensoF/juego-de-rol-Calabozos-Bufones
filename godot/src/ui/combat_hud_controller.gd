@@ -37,7 +37,7 @@ const LOG_COLORS := {
 }
 
 func _ready() -> void:
-	print("CombatHUDController: Construyendo UI con Turn Track e Iniciativa...")
+	print("CombatHUDController: Construyendo UI limpia y auditada...")
 	mouse_filter = MOUSE_FILTER_IGNORE
 	_build_top_status_banner()
 	_build_turn_track()
@@ -414,7 +414,7 @@ func _render_inventory_items() -> void:
 		var empty_lbl := Label.new()
 		empty_lbl.text = "Mochila vacía"
 		empty_lbl.add_theme_font_size_override("font_size", 13)
-	inventory_container.add_child(empty_lbl)
+		inventory_container.add_child(empty_lbl)
 		return
 
 	for it in game_manager.party_inventory:
@@ -427,7 +427,7 @@ func _render_inventory_items() -> void:
 			if EventBus: EventBus.item_used.emit(it_id, uid)
 			_render_inventory_items()
 		)
-	inventory_container.add_child(item_btn)
+		inventory_container.add_child(item_btn)
 
 func _on_inventory_updated(_items: Array) -> void:
 	if inventory_panel and inventory_panel.visible:
@@ -452,7 +452,8 @@ func _on_log_appended(text: String, type: String) -> void:
 		"%02x" % int(color.g * 255),
 		"%02x" % int(color.b * 255)
 	]
-	log_richtext.append_text("[color=%s]%s[/color]\n" % [hex, text])
+	log_richtext.append_text("[color=%s]%s[/color]
+" % [hex, text])
 
 func _on_health_updated(unit_id: String, hp: int, hp_max: int, _delta: int) -> void:
 	if not hero_cards.has(unit_id): return
@@ -467,4 +468,3 @@ func _on_health_updated(unit_id: String, hp: int, hp_max: int, _delta: int) -> v
 			hp_lbl.add_theme_color_override("font_color", Color(1.0, 0.8, 0.3))
 		else:
 			hp_lbl.add_theme_color_override("font_color", Color(1.0, 0.4, 0.4))
-

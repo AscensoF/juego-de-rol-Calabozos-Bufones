@@ -268,4 +268,3 @@ func _setup_board_for_current_act():
 
 	if EventBus:
 		EventBus.tile_revealed.emit(Vector2i(4, 8), 5)
-
