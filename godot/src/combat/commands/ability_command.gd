@@ -108,4 +108,3 @@ func _apply_heal_to_target(t: Dictionary, amount: int) -> void:
 
 func undo() -> bool: return false
 func can_undo() -> bool: return false
-

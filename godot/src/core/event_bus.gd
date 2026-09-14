@@ -36,3 +36,5 @@ signal item_used(item_id: String, user_id: String)
 signal inventory_updated(items: Array)
 signal dialogue_requested(lines: Array)
 signal dialogue_finished()
+signal turn_banner_announced(title: String, subtitle: String, is_hero: bool)
+

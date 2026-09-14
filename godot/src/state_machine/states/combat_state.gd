@@ -1,7 +1,10 @@
 class_name CombatState
 extends State
 
-## Estado de Combate Táctico: Selección de objetivo, habilidades especiales D20, inventario y turnos de IA con movimiento inteligente A*.
+## Estado de Combate Táctico con Pacing Deliberado (Baldur's Gate / WFRP):
+## - Barra de Iniciativa superior activa.
+## - Banner de Anuncio de Turno con pausas claras.
+## - Acciones enemigas secuenciadas y legibles sin abrumar.
 
 var combat_heroes: Array = []
 var combat_enemies: Array = []
@@ -23,13 +26,15 @@ func enter(params: Dictionary = {}) -> void:
 
 	var gm = state_machine.get_parent()
 	if gm and gm.has_method("focus_camera_on"):
-		gm.focus_camera_on(_compute_combat_centroid(), 2.5)
+		gm.focus_camera_on(_compute_combat_centroid(), 2.2)
 
 	if EventBus:
 		EventBus.combat_started.emit()
 		EventBus.status_panel_updated.emit("¡COMBATE! Se ha tirado la iniciativa.")
 		EventBus.cell_clicked.connect(_on_cell_clicked)
 
+	await get_tree().create_timer(1.0).timeout
+	if not is_inside_tree(): return
 	start_turn(0)
 
 func exit() -> void:
@@ -51,22 +56,19 @@ func _setup_combatants(params: Dictionary) -> void:
 		var data = h.get("data")
 		if data == null: continue
 		var pos = h.get("pos", Vector2i.ZERO)
-		var dex_mod := 1
-		var attrs = data.get("attributes")
-		if attrs != null and attrs.has_method("get_dex_mod"):
-			dex_mod = attrs.get_dex_mod()
+		var dex_mod := 2
 		combat_heroes.append({
 			"id": "hero_" + str(combat_heroes.size()),
 			"name": data.get("hero_name") if data.get("hero_name") != null else "Héroe",
 			"is_hero": true,
 			"data": data,
 			"pos": pos,
-			"hp": data.get("base_hp") if data.get("base_hp") != null else 10,
-			"hp_max": data.get("base_hp") if data.get("base_hp") != null else 10,
-			"res": data.get("base_resource") if data.get("base_resource") != null else 10,
-			"res_max": data.get("base_resource") if data.get("base_resource") != null else 10,
+			"hp": data.get("base_hp") if data.get("base_hp") != null else 12,
+			"hp_max": data.get("base_hp") if data.get("base_hp") != null else 12,
+			"res": data.get("base_resource") if data.get("base_resource") != null else 4,
+			"res_max": data.get("base_resource") if data.get("base_resource") != null else 4,
 			"res_name": data.get("resource_name") if data.get("resource_name") != null else "Furia",
-			"ac": data.get("base_ac") if data.get("base_ac") != null else 10,
+			"ac": data.get("base_ac") if data.get("base_ac") != null else 12,
 			"speed": data.get("speed") if data.get("speed") != null else 4,
 			"dex_mod": dex_mod,
 			"buffs": [],
@@ -86,9 +88,9 @@ func _setup_combatants(params: Dictionary) -> void:
 			"is_hero": false,
 			"data": edata,
 			"pos": epos,
-			"hp": edata.get("base_hp") if edata.get("base_hp") != null else 5,
-			"hp_max": edata.get("base_hp") if edata.get("base_hp") != null else 5,
-			"ac": edata.get("armor_class") if edata.get("armor_class") != null else 8,
+			"hp": edata.get("base_hp") if edata.get("base_hp") != null else 8,
+			"hp_max": edata.get("base_hp") if edata.get("base_hp") != null else 8,
+			"ac": edata.get("armor_class") if edata.get("armor_class") != null else 10,
 			"speed": edata.get("speed") if edata.get("speed") != null else 3,
 			"init_bonus": edata.get("initiative_bonus") if edata.get("initiative_bonus") != null else 0,
 			"buffs": [],
@@ -141,13 +143,20 @@ func start_turn(index: int) -> void:
 
 	_highlight_current_unit()
 
+	var is_hero: bool = current_unit.get("is_hero", false)
+	var u_name: String = current_unit.get("name", "Unidad")
+
+	# Anuncio cinemático de cambio de turno con pausa clara
 	if EventBus:
 		EventBus.turn_started.emit(current_unit)
-		EventBus.status_panel_updated.emit("Turno de %s" % current_unit["name"])
+		if is_hero:
+			EventBus.turn_banner_announced.emit("⚔️ TURNO DE TU HÉROE", u_name, true)
+			EventBus.status_panel_updated.emit("Turno de %s — Selecciona una acción en la barra inferior o toca un objetivo." % u_name)
+		else:
+			EventBus.turn_banner_announced.emit("🐀 TURNO DEL ENEMIGO", u_name, false)
+			EventBus.status_panel_updated.emit("Turno de %s (Pensando táctica...)" % u_name)
 
-	if current_unit.get("is_hero", false):
-		EventBus.status_panel_updated.emit("Turno de %s — Selecciona habilidad/mochila o toca objetivo." % current_unit["name"])
-	else:
+	if not is_hero:
 		_execute_enemy_ai_turn()
 
 func _highlight_current_unit() -> void:
@@ -163,7 +172,7 @@ func _clear_highlights() -> void:
 		gm.grid_renderer.queue_redraw()
 
 func _execute_enemy_ai_turn() -> void:
-	await get_tree().create_timer(0.6).timeout
+	await get_tree().create_timer(1.0).timeout
 	if not is_inside_tree(): return
 	if not current_unit.get("is_alive", false): return
 
@@ -195,26 +204,28 @@ func _execute_enemy_ai_turn() -> void:
 	if min_dist > 1:
 		var speed: int = current_unit.get("speed", 3)
 		var path = grid.find_path(enemy_pos, hero_pos, 20)
-		if path.size() > 2: # path[0] es origen, path[-1] es la celda del héroe
+		if path.size() > 2:
 			var steps = mini(speed, path.size() - 2)
 			var new_pos = path[steps]
 			grid.move_unit(enemy_pos, new_pos)
 			current_unit["pos"] = new_pos
 			if EventBus: EventBus.unit_moved.emit(current_unit["id"], enemy_pos, new_pos)
 			_highlight_current_unit()
-			await get_tree().create_timer(0.4).timeout
+			await get_tree().create_timer(0.6).timeout
 			if not is_inside_tree(): return
 			enemy_pos = new_pos
 			min_dist = grid.get_distance(enemy_pos, hero_pos)
 
-	# 3. Si quedó a rango de ataque (cuerpo a cuerpo <= 1 o alcance 2), ataca
+	# 3. Si quedó a rango de ataque, asesta el golpe
 	if min_dist <= 2:
+		await get_tree().create_timer(0.3).timeout
 		_resolve_attack(current_unit, target_hero)
 		current_unit["has_acted"] = true
-		await get_tree().create_timer(0.5).timeout
+		await get_tree().create_timer(1.2).timeout # Pausa para que el jugador vea el resultado del daño
 	else:
 		if EventBus:
-			EventBus.combat_log_appended.emit("%s se posiciona tácticamente." % current_unit["name"], "info")
+			EventBus.combat_log_appended.emit("%s se posiciona en las sombras." % current_unit["name"], "info")
+		await get_tree().create_timer(0.8).timeout
 
 	next_turn()
 
@@ -234,6 +245,10 @@ func _on_cell_clicked(grid_pos: Vector2i) -> void:
 
 	_resolve_attack(current_unit, target)
 	current_unit["has_acted"] = true
+	
+	# Pausa deliberada tras el ataque del héroe antes de cambiar de turno
+	await get_tree().create_timer(1.0).timeout
+	if not is_inside_tree(): return
 	next_turn()
 
 func _resolve_attack(attacker: Dictionary, target: Dictionary) -> void:
@@ -316,9 +331,9 @@ func check_battle_end() -> bool:
 
 		if EventBus:
 			EventBus.combat_ended.emit(true)
-			EventBus.combat_log_appended.emit("<b>¡Victoria! Enemigos derrotados. Ganáis %d XP.</b>" % total_xp, "heal")
+			EventBus.combat_log_appended.emit("<b>¡Victoria! Amenazas purgadas. Ganáis %d XP.</b>" % total_xp, "heal")
 
-		state_machine.change_state(Enums.GameFlowState.EXPLORATION, {"xp_earned": total_xp})
+		state_machine.change_state(Enums.GameFlowState.GAME_OVER, {"victory": true})
 		return true
 
 	return false

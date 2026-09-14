@@ -129,4 +129,3 @@ static func resolve_attack(
 		"has_advantage": false,
 		"damage": damage_dealt
 	}
-

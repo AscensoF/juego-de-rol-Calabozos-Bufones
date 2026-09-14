@@ -1,5 +1,5 @@
 9cad1ddce9e5a63143ba340c9520626b
-::res://::1789381605
+::res://::1789381752
 export_presets.cfg::TextFile::-1::1789053007::0::1::::<><><>0<>0<><>::
 ::res://assets/::1789051068
 ::res://assets/audio/::1789051068
@@ -74,10 +74,10 @@ pocion_curacion.tres::Resource/ItemData::-1::1789051123::0::1::::<><><>0<>0<><>:
 ::res://src/::1789051951
 ::res://src/combat/::1789058304
 combat_invoker.gd::GDScript::7763292031796959899::1789051561::0::1::::CombatInvoker<>RefCounted<><>0<>0<><>::
-combat_rules.gd::GDScript::7002313170527051661::1789051517::0::1::::CombatRules<>RefCounted<><>0<>0<><>::
+combat_rules.gd::GDScript::7002313170527051661::1789381713::0::1::::CombatRules<>RefCounted<><>0<>0<><>::
 dice_roller.gd::GDScript::5807401395899387556::1789051493::0::1::::DiceRoller<>RefCounted<><>0<>0<><>::
 ::res://src/combat/commands/::1789052191
-ability_command.gd::GDScript::3953084730727836585::1789051547::0::1::::AbilityCommand<>CombatCommand<><>0<>0<><>::
+ability_command.gd::GDScript::3953084730727836585::1789381725::0::1::::AbilityCommand<>CombatCommand<><>0<>0<><>::
 attack_command.gd::GDScript::3279123400700383851::1789051530::0::1::::AttackCommand<>CombatCommand<><>0<>0<><>::
 combat_command.gd::GDScript::2403054692686623412::1789051519::0::1::::CombatCommand<>RefCounted<><>0<>0<><>::
 defend_command.gd::GDScript::3024487632222727877::1789051558::0::1::::DefendCommand<>CombatCommand<><>0<>0<><>::
