@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/enemy_data.gd" id="1_enemy"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/enemies/rey_orco.png" id="2_portrait"]
+
+[resource]
+script = ExtResource("1_enemy")
+id = "enemy_orco_negro_boss"
+enemy_name = "Grimgar Machakarock, Kaudillo Orco Negro"
+enemy_kind = 1
+portrait = ExtResource("2_portrait")
+is_boss = true
+base_hp = 35
+armor_class = 16
+attack_bonus = 6
+damage_dice_count = 2
+damage_dice_sides = 8
+damage_flat_bonus = 4
+speed = 4
+initiative_bonus = 2
+xp_reward = 100
+special_ability_id = "grito_waaagh"
+special_ability_name = "¡¡WAAAGH!! Implacable"
+special_ability_desc = "Ruge con furia pielverde, aumentando su daño crítico e infundiendo terror en el grupo."

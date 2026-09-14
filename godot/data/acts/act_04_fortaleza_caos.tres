@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ActData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/act_data.gd" id="1_act"]
+[ext_resource type="Resource" path="res://data/enemies/guerrero_caos.tres" id="2_e1"]
+[ext_resource type="Resource" path="res://data/enemies/demonio_auditoria.tres" id="3_e2"]
+[ext_resource type="Resource" path="res://data/enemies/paladin_elegido_caos.tres" id="4_boss"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/act4.ogg" id="5_music"]
+
+[resource]
+script = ExtResource("1_act")
+act_number = 4
+title = "Acto IV: La Fortaleza de la Disformidad"
+synopsis = "El cielo se tiñe de púrpura sobre los Desiertos del Caos. La compañía debe asaltar la ciudadela profana y detener el ritual antes de que el Viejo Mundo sea devorado."
+faction = "Los Elegidos de Sigmar"
+mission_description = "Destruid el Altar Sangriento y decapita al Paladín Elegido del Caos."
+mission_objective = "Derrota a Malakor el Profanador."
+available_enemies = Array[Resource]([ExtResource("2_e1"), ExtResource("3_e2")])
+boss = ExtResource("4_boss")
+map_style = "act4"
+background_music = ExtResource("5_music")

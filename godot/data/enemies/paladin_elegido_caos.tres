@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/enemy_data.gd" id="1_enemy"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/enemies/sombra_narrador.png" id="2_portrait"]
+
+[resource]
+script = ExtResource("1_enemy")
+id = "enemy_paladin_caos_boss"
+enemy_name = "Malakor el Profanador, Elegido del Caos"
+enemy_kind = 1
+portrait = ExtResource("2_portrait")
+is_boss = true
+base_hp = 45
+armor_class = 17
+attack_bonus = 7
+damage_dice_count = 3
+damage_dice_sides = 6
+damage_flat_bonus = 5
+speed = 5
+initiative_bonus = 5
+xp_reward = 200
+special_ability_id = "portal_disformidad"
+special_ability_name = "Desgarro de la Disformidad"
+special_ability_desc = "Abre una brecha dimensional que drena la vida de todo el grupo e inflige daño caótico puro."

@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/enemy_data.gd" id="1_enemy"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/enemies/caos.png" id="2_portrait"]
+
+[resource]
+script = ExtResource("1_enemy")
+id = "enemy_guerrero_caos"
+enemy_name = "Guerrero del Caos de Khorne"
+enemy_kind = 0
+portrait = ExtResource("2_portrait")
+is_boss = false
+base_hp = 20
+armor_class = 16
+attack_bonus = 5
+damage_dice_count = 2
+damage_dice_sides = 6
+damage_flat_bonus = 3
+speed = 4
+initiative_bonus = 2
+xp_reward = 60
+special_ability_id = "furia_sangrienta"
+special_ability_name = "¡Sangre para el Dios de la Sangre!"
+special_ability_desc = "Asesta un tajo brutal que causa hemorragia y gana bonificador de ataque si el héroe ya está herido."

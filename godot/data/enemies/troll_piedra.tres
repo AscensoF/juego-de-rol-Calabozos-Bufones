@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/enemy_data.gd" id="1_enemy"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/enemies/orco.png" id="2_portrait"]
+
+[resource]
+script = ExtResource("1_enemy")
+id = "enemy_troll_piedra"
+enemy_name = "Troll de Piedra Come-Enanos"
+enemy_kind = 0
+portrait = ExtResource("2_portrait")
+is_boss = false
+base_hp = 22
+armor_class = 13
+attack_bonus = 4
+damage_dice_count = 2
+damage_dice_sides = 6
+damage_flat_bonus = 2
+speed = 3
+initiative_bonus = 0
+xp_reward = 50
+special_ability_id = "vomito_acido"
+special_ability_name = "Vómito Ácido de Troll"
+special_ability_desc = "Riega a los héroes adyacentes con bilis corrosiva que funde armaduras y causa 8 de daño."

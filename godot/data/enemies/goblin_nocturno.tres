@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/enemy_data.gd" id="1_enemy"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/enemies/goblin.png" id="2_portrait"]
+
+[resource]
+script = ExtResource("1_enemy")
+id = "enemy_goblin_nocturno"
+enemy_name = "Lancero Goblin Nocturno"
+enemy_kind = 0
+portrait = ExtResource("2_portrait")
+is_boss = false
+base_hp = 9
+armor_class = 12
+attack_bonus = 3
+damage_dice_count = 1
+damage_dice_sides = 6
+damage_flat_bonus = 1
+speed = 5
+initiative_bonus = 3
+xp_reward = 25
+special_ability_id = "veneno_aracnido"
+special_ability_name = "Punta Envenenada"
+special_ability_desc = "Aplica veneno fúngico que inflige 2 de daño recurrente al inicio del turno del héroe."

@@ -161,14 +161,17 @@ func _load_campaign_data():
 	if hud: hud.register_heroes_list(party_heroes)
 
 func load_next_act() -> void:
-	_load_act(current_act_number + 1)
+	var next_act = current_act_number + 1
+	if next_act > 4: next_act = 1 # Loop o Victoria de Campaña
+	_load_act(next_act)
 
 func _load_act(act_num: int) -> void:
 	current_act_number = act_num
-	if act_num == 1:
-		act_data = load("res://data/acts/act_01_taberna.tres") as ActData
-	elif act_num == 2:
-		act_data = load("res://data/acts/act_02_catacumbas.tres") as ActData
+	match act_num:
+		1: act_data = load("res://data/acts/act_01_taberna.tres") as ActData
+		2: act_data = load("res://data/acts/act_02_catacumbas.tres") as ActData
+		3: act_data = load("res://data/acts/act_03_minas_kadrin.tres") as ActData
+		4: act_data = load("res://data/acts/act_04_fortaleza_caos.tres") as ActData
 	
 	var audio_mgr = get_node_or_null("/root/AudioManager")
 	if audio_mgr and audio_mgr.has_method("play_act_music"):
@@ -204,67 +207,133 @@ func _setup_board_for_current_act():
 		}
 		tactical_grid.register_unit(hero_token, pos)
 
-	if current_act_number == 1:
-		tactical_grid.set_cell_type(Vector2i(8, 8), Enums.CellType.TRAP)
-		tactical_grid.set_cell_type(Vector2i(10, 5), Enums.CellType.CHEST)
-		tactical_grid.set_cell_type(Vector2i(6, 12), Enums.CellType.ALTAR)
-		tactical_grid.set_cell_type(Vector2i(14, 4), Enums.CellType.BOOKSHELF)
-		
-		var goblin_data = load("res://data/enemies/goblin_burocrata.tres")
-		if goblin_data:
-			tactical_grid.register_unit({
-				"id": "enemy_skaven_1",
-				"name": "Guerrero de Clan Skaven",
-				"is_hero": false, "data": goblin_data,
-				"hp": 8, "hp_max": 8,
-				"is_alive": true
-			}, Vector2i(12, 8))
+	match current_act_number:
+		1:
+			# Acto 1: Alcantarillas de Altdorf (Skavens)
+			tactical_grid.set_cell_type(Vector2i(8, 8), Enums.CellType.TRAP)
+			tactical_grid.set_cell_type(Vector2i(10, 5), Enums.CellType.CHEST)
+			tactical_grid.set_cell_type(Vector2i(6, 12), Enums.CellType.ALTAR)
+			tactical_grid.set_cell_type(Vector2i(14, 4), Enums.CellType.BOOKSHELF)
+			
+			var goblin_data = load("res://data/enemies/goblin_burocrata.tres")
+			if goblin_data:
+				tactical_grid.register_unit({
+					"id": "enemy_skaven_1",
+					"name": "Guerrero de Clan Skaven",
+					"is_hero": false, "data": goblin_data,
+					"hp": 8, "hp_max": 8,
+					"is_alive": true
+				}, Vector2i(12, 8))
 
-		var esq_data = load("res://data/enemies/esqueleto_desmotivado.tres")
-		if esq_data:
-			tactical_grid.register_unit({
-				"id": "enemy_rata_1",
-				"name": "Rata Gigante de Alcantarilla",
-				"is_hero": false, "data": esq_data,
-				"hp": 6, "hp_max": 6,
-				"is_alive": true
-			}, Vector2i(15, 10))
+			var esq_data = load("res://data/enemies/esqueleto_desmotivado.tres")
+			if esq_data:
+				tactical_grid.register_unit({
+					"id": "enemy_rata_1",
+					"name": "Rata Gigante de Alcantarilla",
+					"is_hero": false, "data": esq_data,
+					"hp": 6, "hp_max": 6,
+					"is_alive": true
+				}, Vector2i(15, 10))
 
-	elif current_act_number == 2:
-		tactical_grid.set_cell_type(Vector2i(7, 6), Enums.CellType.TRAP)
-		tactical_grid.set_cell_type(Vector2i(11, 10), Enums.CellType.TRAP)
-		tactical_grid.set_cell_type(Vector2i(14, 5), Enums.CellType.CHEST)
-		tactical_grid.set_cell_type(Vector2i(8, 14), Enums.CellType.ALTAR)
-		
-		var limo_data = load("res://data/enemies/limo_toxico.tres")
-		if limo_data:
-			tactical_grid.register_unit({
-				"id": "enemy_limo_1",
-				"name": "Engendro de Nurgle",
-				"is_hero": false, "data": limo_data,
-				"hp": 14, "hp_max": 14,
-				"is_alive": true
-			}, Vector2i(11, 7))
-		
-		var mimi_data = load("res://data/enemies/mimeto_archivo.tres")
-		if mimi_data:
-			tactical_grid.register_unit({
-				"id": "enemy_mimi_1",
-				"name": "Cazador Furtivo Hombre Bestia",
-				"is_hero": false, "data": mimi_data,
-				"hp": 16, "hp_max": 16,
-				"is_alive": true
-			}, Vector2i(15, 8))
-		
-		var boss_data = load("res://data/enemies/demonio_auditoria.tres")
-		if boss_data:
-			tactical_grid.register_unit({
-				"id": "enemy_boss_2",
-				"name": "Caudillo Gor de Nurgle",
-				"is_hero": false, "data": boss_data,
-				"hp": 30, "hp_max": 30,
-				"is_alive": true
-			}, Vector2i(18, 11))
+		2:
+			# Acto 2: El Bosque de las Sombras (Hombres Bestia y Nurgle)
+			tactical_grid.set_cell_type(Vector2i(7, 6), Enums.CellType.TRAP)
+			tactical_grid.set_cell_type(Vector2i(11, 10), Enums.CellType.TRAP)
+			tactical_grid.set_cell_type(Vector2i(14, 5), Enums.CellType.CHEST)
+			tactical_grid.set_cell_type(Vector2i(8, 14), Enums.CellType.ALTAR)
+			
+			var limo_data = load("res://data/enemies/limo_toxico.tres")
+			if limo_data:
+				tactical_grid.register_unit({
+					"id": "enemy_limo_1",
+					"name": "Engendro de Nurgle",
+					"is_hero": false, "data": limo_data,
+					"hp": 14, "hp_max": 14,
+					"is_alive": true
+				}, Vector2i(11, 7))
+			
+			var mimi_data = load("res://data/enemies/mimeto_archivo.tres")
+			if mimi_data:
+				tactical_grid.register_unit({
+					"id": "enemy_mimi_1",
+					"name": "Cazador Furtivo Hombre Bestia",
+					"is_hero": false, "data": mimi_data,
+					"hp": 16, "hp_max": 16,
+					"is_alive": true
+				}, Vector2i(15, 8))
+			
+			var boss_data = load("res://data/enemies/demonio_auditoria.tres")
+			if boss_data:
+				tactical_grid.register_unit({
+					"id": "enemy_boss_2",
+					"name": "Caudillo Gor de Nurgle",
+					"is_hero": false, "data": boss_data,
+					"hp": 30, "hp_max": 30,
+					"is_alive": true
+				}, Vector2i(18, 11))
+
+		3:
+			# Acto 3: Las Minas Olvidadas de Karak Kadrin (Pielesverdes y Trolls)
+			tactical_grid.set_cell_type(Vector2i(6, 6), Enums.CellType.TRAP)
+			tactical_grid.set_cell_type(Vector2i(12, 12), Enums.CellType.CHEST)
+			tactical_grid.set_cell_type(Vector2i(16, 6), Enums.CellType.ALTAR)
+			
+			var gob_data = load("res://data/enemies/goblin_nocturno.tres")
+			if gob_data:
+				tactical_grid.register_unit({
+					"id": "enemy_gob_kadrin",
+					"name": "Lancero Goblin Nocturno",
+					"is_hero": false, "data": gob_data,
+					"hp": 10, "hp_max": 10,
+					"is_alive": true
+				}, Vector2i(11, 8))
+			
+			var troll_data = load("res://data/enemies/troll_piedra.tres")
+			if troll_data:
+				tactical_grid.register_unit({
+					"id": "enemy_troll_kadrin",
+					"name": "Troll de Piedra Come-Enanos",
+					"is_hero": false, "data": troll_data,
+					"hp": 24, "hp_max": 24,
+					"is_alive": true
+				}, Vector2i(15, 9))
+			
+			var orco_boss = load("res://data/enemies/caudillo_orco_negro.tres")
+			if orco_boss:
+				tactical_grid.register_unit({
+					"id": "enemy_orco_boss_3",
+					"name": "Grimgar Machakarock",
+					"is_hero": false, "data": orco_boss,
+					"hp": 38, "hp_max": 38,
+					"is_alive": true
+				}, Vector2i(18, 12))
+
+		4:
+			# Acto 4: La Fortaleza de la Disformidad (Guerreros del Caos)
+			tactical_grid.set_cell_type(Vector2i(8, 6), Enums.CellType.TRAP)
+			tactical_grid.set_cell_type(Vector2i(10, 12), Enums.CellType.TRAP)
+			tactical_grid.set_cell_type(Vector2i(15, 5), Enums.CellType.CHEST)
+			tactical_grid.set_cell_type(Vector2i(6, 14), Enums.CellType.ALTAR)
+			
+			var caos_data = load("res://data/enemies/guerrero_caos.tres")
+			if caos_data:
+				tactical_grid.register_unit({
+					"id": "enemy_caos_1",
+					"name": "Guerrero del Caos de Khorne",
+					"is_hero": false, "data": caos_data,
+					"hp": 22, "hp_max": 22,
+					"is_alive": true
+				}, Vector2i(12, 8))
+			
+			var paladin_boss = load("res://data/enemies/paladin_elegido_caos.tres")
+			if paladin_boss:
+				tactical_grid.register_unit({
+					"id": "enemy_paladin_boss_4",
+					"name": "Malakor el Profanador",
+					"is_hero": false, "data": paladin_boss,
+					"hp": 50, "hp_max": 50,
+					"is_alive": true
+				}, Vector2i(18, 10))
 
 	if EventBus:
 		EventBus.tile_revealed.emit(Vector2i(4, 8), 5)

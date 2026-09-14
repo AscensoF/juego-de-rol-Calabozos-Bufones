@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ActData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/act_data.gd" id="1_act"]
+[ext_resource type="Resource" path="res://data/enemies/goblin_nocturno.tres" id="2_e1"]
+[ext_resource type="Resource" path="res://data/enemies/troll_piedra.tres" id="3_e2"]
+[ext_resource type="Resource" path="res://data/enemies/caudillo_orco_negro.tres" id="4_boss"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/act3.ogg" id="5_music"]
+
+[resource]
+script = ExtResource("1_act")
+act_number = 3
+title = "Acto III: Las Minas Olvidadas de Karak Kadrin"
+synopsis = "Gotreksson guía a la compañía a través de los salones ancestrales enanos, ahora infestados por la marea verde de Goblins Nocturnos y Trolls de Piedra."
+faction = "Los Matadores de Karak Kadrin"
+mission_description = "Recuperad la Forja Rúnica y aniquilad al Kaudillo Orco Negro antes de que profanen las tumbas de los Reyes."
+mission_objective = "Derrota a Grimgar Machakarock."
+available_enemies = Array[Resource]([ExtResource("2_e1"), ExtResource("3_e2")])
+boss = ExtResource("4_boss")
+map_style = "act3"
+background_music = ExtResource("5_music")
