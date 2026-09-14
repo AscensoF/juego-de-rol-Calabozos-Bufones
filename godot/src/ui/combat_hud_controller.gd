@@ -452,8 +452,7 @@ func _on_log_appended(text: String, type: String) -> void:
 		"%02x" % int(color.g * 255),
 		"%02x" % int(color.b * 255)
 	]
-	log_richtext.append_text("[color=%s]%s[/color]
-" % [hex, text])
+	log_richtext.append_text("[color=%s]%s[/color]\n" % [hex, text])
 
 func _on_health_updated(unit_id: String, hp: int, hp_max: int, _delta: int) -> void:
 	if not hero_cards.has(unit_id): return
