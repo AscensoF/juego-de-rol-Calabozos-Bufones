@@ -1,5 +1,5 @@
 9cad1ddce9e5a63143ba340c9520626b
-::res://::1789383800
+::res://::1789383987
 export_presets.cfg::TextFile::-1::1789053007::0::1::::<><><>0<>0<><>::
 ::res://assets/::1789051068
 ::res://assets/audio/::1789051068
@@ -131,7 +131,7 @@ main_menu_state.gd::GDScript::4183432959819545098::1789051306::0::1::::MainMenuS
 combat_hud_controller.gd::GDScript::6222478366601570723::1789383777::0::1::::CombatHUDController<>Control<><>0<>0<><>::
 dialogue_box.gd::GDScript::8319132859655559540::1789378372::0::1::::DialogueBox<>Control<><>0<>0<><>::
 dice_visualizer.gd::GDScript::2608445091248256499::1789051652::0::1::::DiceVisualizer<>Control<><>0<>0<><>::
-main_menu.tscn::PackedScene::-1::1789058258::0::1::::<><><>0<>0<><>::res://src/core/game_manager.gd<>res://src/map/grid_renderer.gd<>res://src/pooling/pool_manager.gd<>res://src/state_machine/state_machine.gd<>res://src/state_machine/states/main_menu_state.gd<>res://src/state_machine/states/exploration_state.gd<>res://src/state_machine/states/combat_state.gd<>res://src/state_machine/states/dj_mode_state.gd<>res://src/state_machine/states/game_over_state.gd<>res://src/ui/combat_hud_controller.gd<>res://src/ui/dice_visualizer.gd<>res://src/dj_mode/dj_mode_controller.gd<>res://src/ui/main_menu_controller.gd
+main_menu.tscn::PackedScene::-1::1789383948::0::1::::<><><>0<>0<><>::res://src/core/game_manager.gd<>res://src/map/grid_renderer.gd<>res://src/pooling/pool_manager.gd<>res://src/state_machine/state_machine.gd<>res://src/state_machine/states/main_menu_state.gd<>res://src/state_machine/states/exploration_state.gd<>res://src/state_machine/states/combat_state.gd<>res://src/state_machine/states/dj_mode_state.gd<>res://src/state_machine/states/game_over_state.gd<>res://src/ui/combat_hud_controller.gd<>res://src/ui/dice_visualizer.gd<>res://src/dj_mode/dj_mode_controller.gd<>res://src/ui/main_menu_controller.gd<>res://assets/sprites/ui/fondo.jpeg<>res://assets/sprites/ui/logo.png
 main_menu_controller.gd::GDScript::7595151848011250541::1789119419::0::1::::<>Control<><>0<>0<><>::
 ::res://src/ui/components/::1789052191
 combat_log_view.gd::GDScript::2030446918808291017::1789051658::0::1::::CombatLogView<>PanelContainer<><>0<>0<><>::
