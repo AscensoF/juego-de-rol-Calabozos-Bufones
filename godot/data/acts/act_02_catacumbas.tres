@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ActData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/act_data.gd" id="1_act"]
+[ext_resource type="Resource" path="res://data/enemies/limo_toxico.tres" id="2_e1"]
+[ext_resource type="Resource" path="res://data/enemies/mimeto_archivo.tres" id="3_e2"]
+[ext_resource type="Resource" path="res://data/enemies/demonio_auditoria.tres" id="4_boss"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/act2.ogg" id="5_music"]
+
+[resource]
+script = ExtResource("1_act")
+act_number = 2
+title = "Acto II: Las Catacumbas del Despido Procedente"
+synopsis = "Descendéis al sótano de expedientes extraviados, donde las criaturas del papeleo y los auditores del averno custodian los contratos perdidos."
+faction = "Departamento de Recursos No Humanos"
+mission_description = "Recuperad el acta fundacional antes de que Balthazar embargue vuestras almas."
+mission_objective = "Derrota a Balthazar, Auditor del Abismo."
+available_enemies = Array[Resource]([ExtResource("2_e1"), ExtResource("3_e2")])
+boss = ExtResource("4_boss")
+map_style = "act2"
+background_music = ExtResource("5_music")
+

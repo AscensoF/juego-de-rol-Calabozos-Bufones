@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/enemy_data.gd" id="1_enemy"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/enemies/demonio.png" id="2_portrait"]
+
+[resource]
+script = ExtResource("1_enemy")
+id = "enemy_demonio_auditoria"
+enemy_name = "Balthazar, Auditor del Abismo"
+enemy_kind = 1
+portrait = ExtResource("2_portrait")
+is_boss = true
+base_hp = 28
+armor_class = 15
+attack_bonus = 5
+damage_dice_count = 2
+damage_dice_sides = 6
+damage_flat_bonus = 3
+speed = 4
+initiative_bonus = 4
+xp_reward = 75
+special_ability_id = "embargo_infernal"
+special_ability_name = "Embargo Infernal"
+special_ability_desc = "Desata una auditoría de fuego que daña a todos los héroes cercanos y les drena 1 punto de recurso."
+

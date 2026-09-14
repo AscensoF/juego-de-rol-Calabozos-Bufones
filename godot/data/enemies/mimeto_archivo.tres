@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/enemy_data.gd" id="1_enemy"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/enemies/mimi.png" id="2_portrait"]
+
+[resource]
+script = ExtResource("1_enemy")
+id = "enemy_mimeto_archivo"
+enemy_name = "Mímico de Archivo Central"
+enemy_kind = 0
+portrait = ExtResource("2_portrait")
+is_boss = false
+base_hp = 16
+armor_class = 13
+attack_bonus = 4
+damage_dice_count = 1
+damage_dice_sides = 8
+damage_flat_bonus = 2
+speed = 4
+initiative_bonus = 2
+xp_reward = 30
+special_ability_id = "mordisco_expediente"
+special_ability_name = "Mordisco Burocrático"
+special_ability_desc = "Engulle los papeles del héroe, causándole confusión durante 1 turno."
+

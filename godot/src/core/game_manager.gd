@@ -15,7 +15,7 @@ var act_data: ActData
 var camera: TacticalCamera
 var dialogue_box: DialogueBox
 
-# Inventario compartido del grupo
+var current_act_number: int = 1
 var party_inventory: Array[Dictionary] = []
 
 func _ready():
@@ -33,7 +33,7 @@ func _ready():
 	_setup_dialogue_box()
 	_load_campaign_data()
 	_setup_initial_inventory()
-	_setup_initial_board()
+	_load_act(1)
 	_subscribe_inventory_events()
 	_trigger_intro_dialogue()
 
@@ -147,7 +147,7 @@ func _on_item_used(item_id: String, user_id: String) -> void:
 	remove_item_from_inventory(item_id)
 
 func _load_campaign_data():
-	act_data = load("res://data/acts/act_01_taberna.tres") as ActData
+	party_heroes.clear()
 	var throg = load("res://data/heroes/throg.tres")
 	var elowen = load("res://data/heroes/elowen.tres")
 	var grimble = load("res://data/heroes/grimble.tres")
@@ -160,7 +160,30 @@ func _load_campaign_data():
 	
 	if hud: hud.register_heroes_list(party_heroes)
 
-func _setup_initial_board():
+func load_next_act() -> void:
+	_load_act(current_act_number + 1)
+
+func _load_act(act_num: int) -> void:
+	current_act_number = act_num
+	var act_path := "res://data/acts/act_0%d_*.tres" % act_num
+	if act_num == 1:
+		act_data = load("res://data/acts/act_01_taberna.tres") as ActData
+	elif act_num == 2:
+		act_data = load("res://data/acts/act_02_catacumbas.tres") as ActData
+	
+	# Reproducir música del acto
+	var audio_mgr = get_node_or_null("/root/AudioManager")
+	if audio_mgr and audio_mgr.has_method("play_act_music"):
+		audio_mgr.play_act_music(act_num)
+	
+	_setup_board_for_current_act()
+
+func _setup_board_for_current_act():
+	tactical_grid = TacticalGrid.new()
+	if grid_renderer:
+		grid_renderer.tactical_grid = tactical_grid
+		grid_renderer._init_fog()
+
 	var start_positions := [
 		Vector2i(4, 8), Vector2i(4, 9),
 		Vector2i(3, 8), Vector2i(3, 9)
@@ -183,32 +206,73 @@ func _setup_initial_board():
 		}
 		tactical_grid.register_unit(hero_token, pos)
 
-	tactical_grid.set_cell_type(Vector2i(8, 8), Enums.CellType.TRAP)
-	tactical_grid.set_cell_type(Vector2i(10, 5), Enums.CellType.CHEST)
-	tactical_grid.set_cell_type(Vector2i(6, 12), Enums.CellType.ALTAR)
-	tactical_grid.set_cell_type(Vector2i(14, 4), Enums.CellType.BOOKSHELF)
+	if current_act_number == 1:
+		tactical_grid.set_cell_type(Vector2i(8, 8), Enums.CellType.TRAP)
+		tactical_grid.set_cell_type(Vector2i(10, 5), Enums.CellType.CHEST)
+		tactical_grid.set_cell_type(Vector2i(6, 12), Enums.CellType.ALTAR)
+		tactical_grid.set_cell_type(Vector2i(14, 4), Enums.CellType.BOOKSHELF)
+		
+		var goblin_data = load("res://data/enemies/goblin_burocrata.tres")
+		if goblin_data:
+			tactical_grid.register_unit({
+				"id": "enemy_goblin_1",
+				"name": goblin_data.get("enemy_name") if goblin_data.get("enemy_name") != null else "Goblin",
+				"is_hero": false, "data": goblin_data,
+				"hp": goblin_data.get("base_hp") if goblin_data.get("base_hp") != null else 5,
+				"hp_max": goblin_data.get("base_hp") if goblin_data.get("base_hp") != null else 5,
+				"is_alive": true
+			}, Vector2i(12, 8))
 
-	var goblin_data = load("res://data/enemies/goblin_burocrata.tres")
-	if goblin_data:
-		tactical_grid.register_unit({
-			"id": "enemy_goblin_1",
-			"name": goblin_data.get("enemy_name") if goblin_data.get("enemy_name") != null else "Goblin",
-			"is_hero": false, "data": goblin_data,
-			"hp": goblin_data.get("base_hp") if goblin_data.get("base_hp") != null else 5,
-			"hp_max": goblin_data.get("base_hp") if goblin_data.get("base_hp") != null else 5,
-			"is_alive": true
-		}, Vector2i(12, 8))
+		var esq_data = load("res://data/enemies/esqueleto_desmotivado.tres")
+		if esq_data:
+			tactical_grid.register_unit({
+				"id": "enemy_esq_1",
+				"name": esq_data.get("enemy_name") if esq_data.get("enemy_name") != null else "Esqueleto",
+				"is_hero": false, "data": esq_data,
+				"hp": esq_data.get("base_hp") if esq_data.get("base_hp") != null else 6,
+				"hp_max": esq_data.get("base_hp") if esq_data.get("base_hp") != null else 6,
+				"is_alive": true
+			}, Vector2i(15, 10))
 
-	var esq_data = load("res://data/enemies/esqueleto_desmotivado.tres")
-	if esq_data:
-		tactical_grid.register_unit({
-			"id": "enemy_esq_1",
-			"name": esq_data.get("enemy_name") if esq_data.get("enemy_name") != null else "Esqueleto",
-			"is_hero": false, "data": esq_data,
-			"hp": esq_data.get("base_hp") if esq_data.get("base_hp") != null else 6,
-			"hp_max": esq_data.get("base_hp") if esq_data.get("base_hp") != null else 6,
-			"is_alive": true
-		}, Vector2i(15, 10))
+	elif current_act_number == 2:
+		# Layout del Acto 2 (Catacumbas)
+		tactical_grid.set_cell_type(Vector2i(7, 6), Enums.CellType.TRAP)
+		tactical_grid.set_cell_type(Vector2i(11, 10), Enums.CellType.TRAP)
+		tactical_grid.set_cell_type(Vector2i(14, 5), Enums.CellType.CHEST)
+		tactical_grid.set_cell_type(Vector2i(8, 14), Enums.CellType.ALTAR)
+		
+		var limo_data = load("res://data/enemies/limo_toxico.tres")
+		if limo_data:
+			tactical_grid.register_unit({
+				"id": "enemy_limo_1",
+				"name": limo_data.get("enemy_name"),
+				"is_hero": false, "data": limo_data,
+				"hp": limo_data.get("base_hp", 12),
+				"hp_max": limo_data.get("base_hp", 12),
+				"is_alive": true
+			}, Vector2i(11, 7))
+		
+		var mimi_data = load("res://data/enemies/mimeto_archivo.tres")
+		if mimi_data:
+			tactical_grid.register_unit({
+				"id": "enemy_mimi_1",
+				"name": mimi_data.get("enemy_name"),
+				"is_hero": false, "data": mimi_data,
+				"hp": mimi_data.get("base_hp", 16),
+				"hp_max": mimi_data.get("base_hp", 16),
+				"is_alive": true
+			}, Vector2i(15, 8))
+		
+		var boss_data = load("res://data/enemies/demonio_auditoria.tres")
+		if boss_data:
+			tactical_grid.register_unit({
+				"id": "enemy_boss_2",
+				"name": boss_data.get("enemy_name"),
+				"is_hero": false, "data": boss_data,
+				"hp": boss_data.get("base_hp", 28),
+				"hp_max": boss_data.get("base_hp", 28),
+				"is_alive": true
+			}, Vector2i(18, 11))
 
 	if EventBus:
 		EventBus.tile_revealed.emit(Vector2i(4, 8), 5)
