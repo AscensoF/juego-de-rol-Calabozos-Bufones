@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/ability_data.gd" id="1_ab"]
+
+[resource]
+script = ExtResource("1_ab")
+id = "ab_plegaria_sigmar"
+ability_name = "Plegaria de Sanación"
+cost = 2
+cost_type = 0
+range_tiles = 3
+area_of_effect = 2
+damage_dice_count = 0
+damage_dice_sides = 0
+damage_flat_bonus = 0
+heal_amount = 10
+status_effect_duration = 0
+description = "Una plegaria ferviente a Sigmar Heldenhammer que restaura la vida y la moral de los aliados cercanos."
+

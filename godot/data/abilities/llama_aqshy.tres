@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/ability_data.gd" id="1_ab"]
+
+[resource]
+script = ExtResource("1_ab")
+id = "ab_llama_aqshy"
+ability_name = "Furia de Aqshy"
+cost = 2
+cost_type = 2
+range_tiles = 3
+area_of_effect = 2
+damage_dice_count = 2
+damage_dice_sides = 8
+damage_flat_bonus = 2
+heal_amount = 0
+status_effect_duration = 2
+description = "Desata una llamarada incandescente del Viento de Fuego que calcina a los enemigos en área."
+

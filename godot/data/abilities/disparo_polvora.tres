@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/ability_data.gd" id="1_ab"]
+
+[resource]
+script = ExtResource("1_ab")
+id = "ab_disparo_polvora"
+ability_name = "Virote de Plata & Pólvora"
+cost = 1
+cost_type = 1
+range_tiles = 4
+area_of_effect = 1
+damage_dice_count = 1
+damage_dice_sides = 10
+damage_flat_bonus = 4
+heal_amount = 0
+status_effect_duration = 0
+description = "Disparo perforante de pistola de chispa imperial bendecida contra monstruos y herejes."
+

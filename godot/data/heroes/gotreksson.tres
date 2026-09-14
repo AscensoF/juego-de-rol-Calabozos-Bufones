@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="HeroData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/hero_data.gd" id="1_hero"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/heroes/throg.png" id="2_portrait"]
+[ext_resource type="Resource" path="res://data/abilities/golpe_matador.tres" id="3_ab"]
+
+[resource]
+script = ExtResource("1_hero")
+id = "hero_gotreksson"
+hero_name = "Gotreksson el Matador"
+hero_class = 0
+portrait = ExtResource("2_portrait")
+base_hp = 18
+base_resource = 4
+resource_name = "Furia Berserker"
+base_ac = 12
+speed = 4
+level = 1
+current_xp = 0
+xp_to_next_level = 100
+gold = 25
+lore_bio = "Un Matador enano de Karak Kadrin que busca una muerte honorable combatiendo monstruos descomunales en el Viejo Mundo."
+abilities = Array[Resource]([ExtResource("3_ab")])
+

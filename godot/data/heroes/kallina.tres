@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="HeroData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/hero_data.gd" id="1_hero"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/heroes/elowen.png" id="2_portrait"]
+[ext_resource type="Resource" path="res://data/abilities/disparo_polvora.tres" id="3_ab"]
+
+[resource]
+script = ExtResource("1_hero")
+id = "hero_kallina"
+hero_name = "Kallina von Halstadt"
+hero_class = 2
+portrait = ExtResource("2_portrait")
+base_hp = 12
+base_resource = 3
+resource_name = "Pólvora & Virotes"
+base_ac = 14
+speed = 5
+level = 1
+current_xp = 0
+xp_to_next_level = 100
+gold = 40
+lore_bio = "Cazadora de Brujas de la Orden del Corazón Ardiente. Purga la herejía con fuego, plata y pólvora bendita."
+abilities = Array[Resource]([ExtResource("3_ab")])
+

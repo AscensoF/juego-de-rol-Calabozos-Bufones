@@ -1,5 +1,5 @@
 9cad1ddce9e5a63143ba340c9520626b
-::res://::1789379044
+::res://::1789380461
 export_presets.cfg::TextFile::-1::1789053007::0::1::::<><><>0<>0<><>::
 ::res://assets/::1789051068
 ::res://assets/audio/::1789051068
@@ -43,11 +43,15 @@ grimble_bolsillos_ajenos.tres::Resource/AbilityData::-1::1789051138::0::1::::<><
 throg_golpe_poderoso.tres::Resource/AbilityData::-1::1789051128::0::1::::<><><>0<>0<><>::res://src/data_classes/ability_data.gd
 throg_grito_desafiante.tres::Resource/AbilityData::-1::1789051128::0::1::::<><><>0<>0<><>::res://src/data_classes/ability_data.gd
 throg_inmortal.tres::Resource/AbilityData::-1::1789051128::0::1::::<><><>0<>0<><>::res://src/data_classes/ability_data.gd
-::res://data/acts/::1789051156
+::res://data/acts/::1789380420
 act_01_taberna.tres::Resource/ActData::-1::1789051156::0::1::::<><><>0<>0<><>::res://src/data_classes/act_data.gd<>res://data/enemies/goblin_burocrata.tres<>res://data/enemies/esqueleto_desmotivado.tres<>res://data/enemies/rey_orco_karaoke.tres<>res://assets/audio/music/act1.ogg
-::res://data/enemies/::1789051153
+act_02_catacumbas.tres::Resource/ActData::-1::1789380420::0::1::::<><><>0<>0<><>::res://src/data_classes/act_data.gd<>res://data/enemies/limo_toxico.tres<>res://data/enemies/mimeto_archivo.tres<>res://data/enemies/demonio_auditoria.tres<>res://assets/audio/music/act2.ogg
+::res://data/enemies/::1789380417
+demonio_auditoria.tres::Resource/EnemyData::-1::1789380417::0::1::::<><><>0<>0<><>::res://src/data_classes/enemy_data.gd<>res://assets/sprites/characters/enemies/demonio.png
 esqueleto_desmotivado.tres::Resource/EnemyData::-1::1789051153::0::1::::<><><>0<>0<><>::res://src/data_classes/enemy_data.gd<>res://assets/sprites/characters/enemies/esqueleto.png
 goblin_burocrata.tres::Resource/EnemyData::-1::1789051153::0::1::::<><><>0<>0<><>::res://src/data_classes/enemy_data.gd<>res://assets/sprites/characters/enemies/goblin.png
+limo_toxico.tres::Resource/EnemyData::-1::1789380416::0::1::::<><><>0<>0<><>::res://src/data_classes/enemy_data.gd<>res://assets/sprites/characters/enemies/limo.png
+mimeto_archivo.tres::Resource/EnemyData::-1::1789380417::0::1::::<><><>0<>0<><>::res://src/data_classes/enemy_data.gd<>res://assets/sprites/characters/enemies/mimi.png
 rey_orco_karaoke.tres::Resource/EnemyData::-1::1789051153::0::1::::<><><>0<>0<><>::res://src/data_classes/enemy_data.gd<>res://assets/sprites/characters/enemies/rey_orco.png
 ::res://data/heroes/::1789051147
 beryl.tres::Resource/HeroData::-1::1789051147::0::1::::<><><>0<>0<><>::res://src/data_classes/hero_data.gd<>res://src/data_classes/character_attributes.gd<>res://data/abilities/beryl_sanacion.tres<>res://data/abilities/beryl_intervencion_divina.tres<>res://data/abilities/beryl_palabra_divina.tres<>res://data/items/pocion_curacion.tres<>res://assets/sprites/characters/heroes/beryl.png
@@ -76,7 +80,7 @@ revive_command.gd::GDScript::8696717236679130490::1789051558::0::1::::ReviveComm
 audio_manager.gd::GDScript::2679629398689013934::1789378932::0::1::::<>Node<><>0<>0<><>::
 enums.gd::GDScript::7320779894863568028::1789123545::0::1::::Enums<>RefCounted<><>0<>0<><>::
 event_bus.gd::GDScript::5175827752525067902::1789378562::0::1::::<>Node<><>0<>0<><>::
-game_manager.gd::GDScript::2342261818330476429::1789378382::0::1::::GameManager<>Node2D<><>0<>0<><>::
+game_manager.gd::GDScript::2342261818330476429::1789380432::0::1::::GameManager<>Node2D<><>0<>0<><>::
 tactical_grid.gd::GDScript::7032140065152167793::1789374693::0::1::::TacticalGrid<>RefCounted<><>0<>0<><>::
 ::res://src/data_classes/::1789116983
 ability_data.gd::GDScript::2408194041198213658::1789123461::0::1::::AbilityData<>Resource<><>0<>0<><>::
@@ -112,7 +116,7 @@ state_machine.gd::GDScript::1848053757891052913::1789052549::0::1::::StateMachin
 combat_state.gd::GDScript::44269340739472116::1789375045::0::1::::CombatState<>State<><>0<>0<><>::
 dj_mode_state.gd::GDScript::6294948140257241617::1789051327::0::1::::DJModeState<>State<><>0<>0<><>::
 exploration_state.gd::GDScript::4035091811599087269::1789374714::0::1::::ExplorationState<>State<><>0<>0<><>::
-game_over_state.gd::GDScript::4567540136680376239::1789375336::0::1::::GameOverState<>State<><>0<>0<><>::
+game_over_state.gd::GDScript::4567540136680376239::1789380437::0::1::::GameOverState<>State<><>0<>0<><>::
 main_menu_state.gd::GDScript::4183432959819545098::1789051306::0::1::::MainMenuState<>State<><>0<>0<><>::
 ::res://src/ui/::1789378395
 combat_hud_controller.gd::GDScript::6222478366601570723::1789379031::0::1::::CombatHUDController<>Control<><>0<>0<><>::

@@ -19,7 +19,7 @@ var current_act_number: int = 1
 var party_inventory: Array[Dictionary] = []
 
 func _ready():
-	RenderingServer.set_default_clear_color(Color(0.04, 0.06, 0.10, 1.0))
+	RenderingServer.set_default_clear_color(Color(0.03, 0.04, 0.07, 1.0))
 	tactical_grid = TacticalGrid.new()
 	combat_invoker = CombatInvoker.new()
 
@@ -53,18 +53,18 @@ func _trigger_intro_dialogue():
 	if EventBus:
 		EventBus.dialogue_requested.emit([
 			{
-				"speaker": "El DJ de la Mazmorra",
-				"text": "¡Bienvenidos a la Taberna del Caos, bufones! La junta directiva exige que limpiéis este calabozo antes de que expire vuestro contrato laboral.",
+				"speaker": "Inquisidor von Kessel",
+				"text": "¡Por Sigmar! Los informes de las alcantarillas de Altdorf no mentían. La herejía y los hombres rata se extienden bajo la ciudad imperial. Purgadlos sin piedad.",
 				"portrait": "res://assets/sprites/ui/logo.png"
 			},
 			{
-				"speaker": "Throg",
-				"text": "¿Contrato? ¡Throg solo entender que aplastar cráneos resuelve cualquier trámite burocrático!",
+				"speaker": "Gotreksson el Matador",
+				"text": "¡Menos discursos y más acero! Mi hacha tiene sed de sangre Skaven. ¡Por Grimnir y por el honor de Karak Kadrin!",
 				"portrait": "res://assets/sprites/characters/heroes/throg.png"
 			},
 			{
-				"speaker": "Elowen",
-				"text": "Cálmate, bárbaro. Revisa tu mochila antes de avanzar hacia las sombras... y cuidado con las trampas en el suelo.",
+				"speaker": "Kallina von Halstadt",
+				"text": "Pólvora seca y virotes de plata listos. Mantened la formación y vigilad las esquinas oscuras.",
 				"portrait": "res://assets/sprites/characters/heroes/elowen.png"
 			}
 		])
@@ -80,19 +80,19 @@ func _setup_initial_inventory():
 	party_inventory.clear()
 	add_item_to_inventory({
 		"id": "pocion_vida_1",
-		"name": "Poción de Vida",
+		"name": "Bálsamo de Shallya",
 		"type": "heal",
-		"value": 8,
+		"value": 10,
 		"icon": "🧪",
-		"desc": "Cura 8 puntos de vida al héroe seleccionado."
+		"desc": "Elixir medicinal bendito que cura 10 heridas graves."
 	})
 	add_item_to_inventory({
 		"id": "pocion_furia_1",
-		"name": "Elixir de Furia",
+		"name": "Pólvora Negra Refinada",
 		"type": "resource",
-		"value": 2,
+		"value": 3,
 		"icon": "⚡",
-		"desc": "Restaura 2 puntos de recurso/furia/maná."
+		"desc": "Recarga 3 puntos de recursos de combate (Furia/Pólvora/Magia)."
 	})
 
 func add_item_to_inventory(item: Dictionary) -> void:
@@ -136,7 +136,7 @@ func _on_item_used(item_id: String, user_id: String) -> void:
 		if EventBus:
 			EventBus.health_updated.emit(user_id, new_hp, unit.get("hp_max", 10), delta)
 			EventBus.floating_text_requested.emit("+%d HP" % delta, Color.GREEN, unit_pos)
-			EventBus.combat_log_appended.emit("🧪 %s usa %s y recupera %d HP." % [u_name, item_dict["name"], delta], "heal")
+			EventBus.combat_log_appended.emit("🧪 %s usa %s y recupera %d heridas." % [u_name, item_dict["name"], delta], "heal")
 	elif it_type == "resource":
 		var new_res = mini(unit.get("res_max", 10), unit.get("res", 0) + it_val)
 		unit["res"] = new_res
@@ -148,14 +148,14 @@ func _on_item_used(item_id: String, user_id: String) -> void:
 
 func _load_campaign_data():
 	party_heroes.clear()
-	var throg = load("res://data/heroes/throg.tres")
-	var elowen = load("res://data/heroes/elowen.tres")
-	var grimble = load("res://data/heroes/grimble.tres")
-	var beryl = load("res://data/heroes/beryl.tres")
+	var gotrek = load("res://data/heroes/gotreksson.tres")
+	var kallina = load("res://data/heroes/kallina.tres")
+	var valtieri = load("res://data/heroes/valtieri.tres")
+	var beryl = load("res://data/heroes/beryl_sigmar.tres")
 	
-	if throg: party_heroes.append(throg)
-	if elowen: party_heroes.append(elowen)
-	if grimble: party_heroes.append(grimble)
+	if gotrek: party_heroes.append(gotrek)
+	if kallina: party_heroes.append(kallina)
+	if valtieri: party_heroes.append(valtieri)
 	if beryl: party_heroes.append(beryl)
 	
 	if hud: hud.register_heroes_list(party_heroes)
@@ -165,13 +165,11 @@ func load_next_act() -> void:
 
 func _load_act(act_num: int) -> void:
 	current_act_number = act_num
-	var act_path := "res://data/acts/act_0%d_*.tres" % act_num
 	if act_num == 1:
 		act_data = load("res://data/acts/act_01_taberna.tres") as ActData
 	elif act_num == 2:
 		act_data = load("res://data/acts/act_02_catacumbas.tres") as ActData
 	
-	# Reproducir música del acto
 	var audio_mgr = get_node_or_null("/root/AudioManager")
 	if audio_mgr and audio_mgr.has_method("play_act_music"):
 		audio_mgr.play_act_music(act_num)
@@ -194,13 +192,13 @@ func _setup_board_for_current_act():
 		var pos = start_positions[i]
 		var hero_token := {
 			"id": "hero_" + str(i),
-			"name": h.get("hero_name") if h.get("hero_name") != null else "Hero",
+			"name": h.get("hero_name") if h.get("hero_name") != null else "Héroe",
 			"is_hero": true, "data": h,
-			"hp": h.get("base_hp") if h.get("base_hp") != null else 10,
-			"hp_max": h.get("base_hp") if h.get("base_hp") != null else 10,
-			"res": h.get("base_resource") if h.get("base_resource") != null else 10,
-			"res_max": h.get("base_resource") if h.get("base_resource") != null else 10,
-			"res_name": h.get("resource_name") if h.get("resource_name") != null else "Furia",
+			"hp": h.get("base_hp") if h.get("base_hp") != null else 12,
+			"hp_max": h.get("base_hp") if h.get("base_hp") != null else 12,
+			"res": h.get("base_resource") if h.get("base_resource") != null else 4,
+			"res_max": h.get("base_resource") if h.get("base_resource") != null else 4,
+			"res_name": h.get("resource_name") if h.get("resource_name") != null else "Recurso",
 			"speed": h.get("speed") if h.get("speed") != null else 4,
 			"is_alive": true
 		}
@@ -215,27 +213,24 @@ func _setup_board_for_current_act():
 		var goblin_data = load("res://data/enemies/goblin_burocrata.tres")
 		if goblin_data:
 			tactical_grid.register_unit({
-				"id": "enemy_goblin_1",
-				"name": goblin_data.get("enemy_name") if goblin_data.get("enemy_name") != null else "Goblin",
+				"id": "enemy_skaven_1",
+				"name": "Guerrero de Clan Skaven",
 				"is_hero": false, "data": goblin_data,
-				"hp": goblin_data.get("base_hp") if goblin_data.get("base_hp") != null else 5,
-				"hp_max": goblin_data.get("base_hp") if goblin_data.get("base_hp") != null else 5,
+				"hp": 8, "hp_max": 8,
 				"is_alive": true
 			}, Vector2i(12, 8))
 
 		var esq_data = load("res://data/enemies/esqueleto_desmotivado.tres")
 		if esq_data:
 			tactical_grid.register_unit({
-				"id": "enemy_esq_1",
-				"name": esq_data.get("enemy_name") if esq_data.get("enemy_name") != null else "Esqueleto",
+				"id": "enemy_rata_1",
+				"name": "Rata Gigante de Alcantarilla",
 				"is_hero": false, "data": esq_data,
-				"hp": esq_data.get("base_hp") if esq_data.get("base_hp") != null else 6,
-				"hp_max": esq_data.get("base_hp") if esq_data.get("base_hp") != null else 6,
+				"hp": 6, "hp_max": 6,
 				"is_alive": true
 			}, Vector2i(15, 10))
 
 	elif current_act_number == 2:
-		# Layout del Acto 2 (Catacumbas)
 		tactical_grid.set_cell_type(Vector2i(7, 6), Enums.CellType.TRAP)
 		tactical_grid.set_cell_type(Vector2i(11, 10), Enums.CellType.TRAP)
 		tactical_grid.set_cell_type(Vector2i(14, 5), Enums.CellType.CHEST)
@@ -245,10 +240,9 @@ func _setup_board_for_current_act():
 		if limo_data:
 			tactical_grid.register_unit({
 				"id": "enemy_limo_1",
-				"name": limo_data.get("enemy_name"),
+				"name": "Engendro de Nurgle",
 				"is_hero": false, "data": limo_data,
-				"hp": limo_data.get("base_hp", 12),
-				"hp_max": limo_data.get("base_hp", 12),
+				"hp": 14, "hp_max": 14,
 				"is_alive": true
 			}, Vector2i(11, 7))
 		
@@ -256,10 +250,9 @@ func _setup_board_for_current_act():
 		if mimi_data:
 			tactical_grid.register_unit({
 				"id": "enemy_mimi_1",
-				"name": mimi_data.get("enemy_name"),
+				"name": "Cazador Furtivo Hombre Bestia",
 				"is_hero": false, "data": mimi_data,
-				"hp": mimi_data.get("base_hp", 16),
-				"hp_max": mimi_data.get("base_hp", 16),
+				"hp": 16, "hp_max": 16,
 				"is_alive": true
 			}, Vector2i(15, 8))
 		
@@ -267,10 +260,9 @@ func _setup_board_for_current_act():
 		if boss_data:
 			tactical_grid.register_unit({
 				"id": "enemy_boss_2",
-				"name": boss_data.get("enemy_name"),
+				"name": "Caudillo Gor de Nurgle",
 				"is_hero": false, "data": boss_data,
-				"hp": boss_data.get("base_hp", 28),
-				"hp_max": boss_data.get("base_hp", 28),
+				"hp": 30, "hp_max": 30,
 				"is_alive": true
 			}, Vector2i(18, 11))
 
