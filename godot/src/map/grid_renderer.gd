@@ -18,23 +18,23 @@ var fog_reveal_times: Dictionary = {}
 var last_fog_reveal_ms: int = 0
 var flash_units: Dictionary = {}
 
-# Paleta y estilos visuales 2.5D
-const COLOR_FLOOR_A := Color(0.14, 0.17, 0.24, 1.0)
-const COLOR_FLOOR_B := Color(0.12, 0.15, 0.21, 1.0)
-const COLOR_WALL_TOP := Color(0.32, 0.38, 0.48, 1.0)
-const COLOR_WALL_FRONT := Color(0.20, 0.24, 0.32, 1.0)
-const COLOR_WALL_BORDER := Color(0.10, 0.12, 0.16, 1.0)
+# Paleta Grimdark Viejo Mundo (Piedra, Barro, Pólvora y Antorchas)
+const COLOR_FLOOR_A := Color(0.12, 0.14, 0.18, 1.0)
+const COLOR_FLOOR_B := Color(0.09, 0.11, 0.15, 1.0)
+const COLOR_WALL_TOP := Color(0.28, 0.32, 0.38, 1.0)
+const COLOR_WALL_FRONT := Color(0.16, 0.19, 0.24, 1.0)
+const COLOR_WALL_BORDER := Color(0.06, 0.08, 0.11, 1.0)
 
-const COLOR_DOOR := Color(0.55, 0.28, 0.10, 1.0)
-const COLOR_TRAP := Color(0.75, 0.15, 0.15, 0.85)
-const COLOR_CHEST := Color(0.90, 0.60, 0.10, 1.0)
-const COLOR_ALTAR := Color(0.10, 0.65, 0.80, 1.0)
-const COLOR_BOOKSHELF := Color(0.60, 0.35, 0.15, 1.0)
+const COLOR_DOOR := Color(0.45, 0.22, 0.08, 1.0)
+const COLOR_TRAP := Color(0.65, 0.12, 0.12, 0.85)
+const COLOR_CHEST := Color(0.85, 0.55, 0.10, 1.0)
+const COLOR_ALTAR := Color(0.80, 0.70, 0.30, 1.0) # Dorado imperial de Sigmar
+const COLOR_BOOKSHELF := Color(0.50, 0.30, 0.12, 1.0)
 
-const COLOR_FOG := Color(0.02, 0.03, 0.05, 0.98)
-const COLOR_GRID_LINE := Color(0.0, 0.0, 0.0, 0.25)
-const COLOR_HIGHLIGHT := Color(0.15, 0.80, 0.40, 0.35)
-const COLOR_PATH_LINE := Color(0.25, 0.85, 1.0, 0.85)
+const COLOR_FOG := Color(0.01, 0.02, 0.04, 0.98)
+const COLOR_GRID_LINE := Color(0.0, 0.0, 0.0, 0.3)
+const COLOR_HIGHLIGHT := Color(0.12, 0.70, 0.35, 0.35)
+const COLOR_PATH_LINE := Color(0.20, 0.75, 0.90, 0.85)
 const FOG_FADE_DURATION := 0.6
 
 var torch_time: float = 0.0
@@ -56,6 +56,18 @@ func _subscribe_events() -> void:
 	EventBus.unit_moved.connect(func(_id, _from, _to): queue_redraw())
 	EventBus.floating_text_requested.connect(_on_floating_text_requested)
 	EventBus.health_updated.connect(_on_health_updated_flash)
+	EventBus.attack_resolved.connect(_on_attack_vfx)
+
+func _on_attack_vfx(_attacker: String, target_name: String, _roll: int, _mod: int, _total: int, _ac: int, is_hit: bool, is_crit: bool, _fumble: bool, damage: int) -> void:
+	if not is_hit or damage <= 0: return
+	if not tactical_grid: return
+	# Buscar la posición de la víctima para spawnear sangre/fuego
+	for pos in tactical_grid.units_by_pos:
+		var u = tactical_grid.units_by_pos[pos]
+		if u.get("name") == target_name:
+			var world_pos = grid_to_world(pos) + Vector2(tile_size * 0.5, tile_size * 0.5)
+			CombatVFX.spawn_blood_splatter(self, world_pos, is_crit)
+			break
 
 func _on_health_updated_flash(unit_id: String, _hp: int, _hp_max: int, delta_hp: int) -> void:
 	if delta_hp < 0:
@@ -124,13 +136,16 @@ func _get_unit_texture(unit: Dictionary) -> Texture2D:
 	var path := ""
 	
 	if is_hero:
-		if "throg" in u_name: path = "res://assets/sprites/characters/heroes/throg.png"
-		elif "elowen" in u_name: path = "res://assets/sprites/characters/heroes/elowen.png"
-		elif "grimble" in u_name: path = "res://assets/sprites/characters/heroes/grimble.png"
+		if "gotrek" in u_name or "throg" in u_name: path = "res://assets/sprites/characters/heroes/throg.png"
+		elif "kallina" in u_name or "elowen" in u_name: path = "res://assets/sprites/characters/heroes/elowen.png"
+		elif "valtieri" in u_name or "grimble" in u_name: path = "res://assets/sprites/characters/heroes/grimble.png"
 		elif "beryl" in u_name: path = "res://assets/sprites/characters/heroes/beryl.png"
 	else:
-		if "goblin" in u_name: path = "res://assets/sprites/characters/enemies/goblin.png"
-		elif "esqueleto" in u_name: path = "res://assets/sprites/characters/enemies/esqueleto.png"
+		if "skaven" in u_name or "goblin" in u_name: path = "res://assets/sprites/characters/enemies/goblin.png"
+		elif "rata" in u_name or "esqueleto" in u_name: path = "res://assets/sprites/characters/enemies/esqueleto.png"
+		elif "nurgle" in u_name or "limo" in u_name: path = "res://assets/sprites/characters/enemies/limo.png"
+		elif "hombre bestia" in u_name or "mimi" in u_name: path = "res://assets/sprites/characters/enemies/mimi.png"
+		elif "caudillo" in u_name or "demonio" in u_name: path = "res://assets/sprites/characters/enemies/demonio.png"
 		elif "orco" in u_name: path = "res://assets/sprites/characters/enemies/rey_orco.png"
 	
 	if path == "": return null
@@ -143,7 +158,7 @@ func _get_unit_texture(unit: Dictionary) -> Texture2D:
 func _draw() -> void:
 	if not tactical_grid: return
 
-	# 1. Base del mapa con textura procedural y relieve de muros
+	# 1. Base del mapa de piedra gótica con relieve 2.5D
 	for y in tactical_grid.HEIGHT:
 		for x in tactical_grid.WIDTH:
 			var cell := Vector2i(x, y)
@@ -151,27 +166,23 @@ func _draw() -> void:
 			var cell_type = tactical_grid.get_cell_type(cell)
 			
 			if cell_type == Enums.CellType.WALL:
-				# Muro con relieve 2.5D
 				draw_rect(rect, COLOR_WALL_FRONT, true)
-				var top_rect := Rect2(rect.position, Vector2(tile_size, tile_size * 0.7))
+				var top_rect := Rect2(rect.position, Vector2(tile_size, tile_size * 0.65))
 				draw_rect(top_rect, COLOR_WALL_TOP, true)
-				draw_rect(rect, COLOR_WALL_BORDER, false, 1.0)
+				draw_rect(rect, COLOR_WALL_BORDER, false, 1.2)
 			else:
-				# Suelo ajedrezado sutil
 				var floor_col = COLOR_FLOOR_A if (x + y) % 2 == 0 else COLOR_FLOOR_B
 				draw_rect(rect, floor_col, true)
 				draw_rect(rect, COLOR_GRID_LINE, false, 0.8)
-				
-				# Elementos especiales
 				_draw_special_cell_decor(cell_type, rect)
 
-	# Celdas accesibles con resalte suave
+	# Celdas alcanzables
 	for h_cell in reachable_cells:
 		var h_rect := Rect2(grid_to_world(h_cell), Vector2(tile_size, tile_size))
 		draw_rect(h_rect, COLOR_HIGHLIGHT, true)
-		draw_rect(h_rect, Color(0.2, 0.9, 0.4, 0.9), false, 1.5)
+		draw_rect(h_rect, Color(0.2, 0.85, 0.4, 0.9), false, 1.5)
 
-	# 2. Línea de Ruta A* con pulsación
+	# 2. Trayectoria táctica A*
 	if current_path.size() > 1:
 		for i in range(current_path.size() - 1):
 			var p1 = grid_to_world(current_path[i]) + Vector2(tile_size * 0.5, tile_size * 0.5)
@@ -179,13 +190,13 @@ func _draw() -> void:
 			draw_line(p1, p2, COLOR_PATH_LINE, 3.5, true)
 			draw_circle(p2, 4.5, Color.CYAN)
 
-	# 3. Luz cálida de antorcha alrededor de los héroes
+	# 3. Luz cálida de antorchas
 	var torch_flicker = 1.0 + sin(torch_time) * 0.08
 	for pos in tactical_grid.units_by_pos.keys():
 		var unit = tactical_grid.units_by_pos[pos]
 		if unit.get("is_hero", false) and unit.get("is_alive", false):
 			var center = grid_to_world(pos) + Vector2(tile_size * 0.5, tile_size * 0.5)
-			draw_circle(center, tile_size * 1.8 * torch_flicker, Color(1.0, 0.75, 0.3, 0.07))
+			draw_circle(center, tile_size * 1.8 * torch_flicker, Color(1.0, 0.7, 0.25, 0.08))
 
 	# 4. Sombras, Sprites y Destellos
 	for pos in tactical_grid.units_by_pos.keys():
@@ -197,12 +208,12 @@ func _draw() -> void:
 			var world_pos = grid_to_world(pos)
 			var center = world_pos + Vector2(tile_size * 0.5, tile_size * 0.5)
 			
-			draw_circle(center + Vector2(0, tile_size * 0.3), tile_size * 0.28, Color(0, 0, 0, 0.45))
+			draw_circle(center + Vector2(0, tile_size * 0.3), tile_size * 0.28, Color(0, 0, 0, 0.5))
 			
 			var u_id: String = unit.get("id", "")
 			if flash_units.has(u_id):
 				var flash_alpha = clamp(flash_units[u_id] / 0.35, 0.0, 0.8)
-				draw_circle(center, tile_size * 0.5, Color(1.0, 0.15, 0.15, flash_alpha))
+				draw_circle(center, tile_size * 0.5, Color(1.0, 0.1, 0.1, flash_alpha))
 
 			var tex = _get_unit_texture(unit)
 			if tex:
@@ -214,10 +225,10 @@ func _draw() -> void:
 			
 			var hp_ratio = float(unit.get("hp", 1)) / float(max(unit.get("hp_max", 1), 1))
 			var bar_rect = Rect2(center.x - (tile_size*0.4), center.y - (tile_size*0.55), tile_size*0.8, 4)
-			draw_rect(bar_rect, Color(0, 0, 0, 0.8), true)
-			draw_rect(Rect2(bar_rect.position, Vector2(bar_rect.size.x * hp_ratio, bar_rect.size.y)), Color(0.2, 0.85, 0.3) if unit.get("is_hero") else Color(0.9, 0.25, 0.25), true)
+			draw_rect(bar_rect, Color(0, 0, 0, 0.85), true)
+			draw_rect(Rect2(bar_rect.position, Vector2(bar_rect.size.x * hp_ratio, bar_rect.size.y)), Color(0.2, 0.85, 0.3) if unit.get("is_hero") else Color(0.9, 0.2, 0.2), true)
 
-	# 5. Niebla de Guerra suave
+	# 5. Niebla de Guerra
 	if not fog_disabled:
 		var now := Time.get_ticks_msec()
 		for y in tactical_grid.HEIGHT:
@@ -233,7 +244,7 @@ func _draw() -> void:
 						var fog_rect := Rect2(grid_to_world(cell), Vector2(tile_size, tile_size))
 						draw_rect(fog_rect, Color(COLOR_FOG.r, COLOR_FOG.g, COLOR_FOG.b, COLOR_FOG.a * alpha), true)
 
-	# 6. Celda Seleccionada y Hover
+	# 6. Celda seleccionada
 	if tactical_grid.is_in_bounds(selected_cell):
 		var sel_rect := Rect2(grid_to_world(selected_cell), Vector2(tile_size, tile_size))
 		draw_rect(sel_rect, Color(1.0, 0.85, 0.2, 0.35), true)
