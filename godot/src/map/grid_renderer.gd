@@ -7,6 +7,7 @@ extends Node2D
 var tactical_grid: TacticalGrid
 var fog_matrix: Dictionary = {}
 var reachable_cells: Array[Vector2i] = []
+var aoe_cells: Array[Vector2i] = []
 var hovered_cell: Vector2i = Vector2i(-1, -1)
 var cursor_mode: String = "default" # "default", "move", "attack", "ability"
 var selected_cell: Vector2i = Vector2i(-1, -1)
@@ -247,6 +248,13 @@ func _draw() -> void:
 						var fog_rect := Rect2(grid_to_world(cell), Vector2(tile_size, tile_size))
 						draw_rect(fog_rect, Color(COLOR_FOG.r, COLOR_FOG.g, COLOR_FOG.b, COLOR_FOG.a * alpha), true)
 
+	# 5b. Resplandor de Área de Efecto (AoE)
+	for aoe_cell in aoe_cells:
+		if tactical_grid.is_in_bounds(aoe_cell) and not fog_matrix.get(aoe_cell, false):
+			var aoe_rect := Rect2(grid_to_world(aoe_cell), Vector2(tile_size, tile_size))
+			draw_rect(aoe_rect, Color(0.9, 0.4, 0.1, 0.45), true)
+			draw_rect(aoe_rect, Color(1.0, 0.6, 0.2, 0.9), false, 2.5)
+
 	# 6. Celda seleccionada
 	if tactical_grid.is_in_bounds(selected_cell):
 		var sel_rect := Rect2(grid_to_world(selected_cell), Vector2(tile_size, tile_size))
@@ -256,7 +264,15 @@ func _draw() -> void:
 	# 6b. Indicador de Cursor Táctico (Retícula de Ataque / Habilidad / Movimiento)
 	if tactical_grid.is_in_bounds(hovered_cell) and not fog_matrix.get(hovered_cell, false):
 		var hover_rect := Rect2(grid_to_world(hovered_cell), Vector2(tile_size, tile_size))
-		var target_unit = tactical_grid.get_unit_at(hovered_cell)
+			var hud = get_parent().get_node_or_null("CanvasLayer/CombatHUD") if get_parent() else null
+	var sel_ab = hud.selected_ability if hud else null
+	if sel_ab and sel_ab.area_of_effect > 0:
+		update_aoe_highlight(hovered_cell, sel_ab.area_of_effect)
+	else:
+		aoe_cells.clear()
+		queue_redraw()
+
+	var target_unit = tactical_grid.get_unit_at(hovered_cell)
 		
 		if not target_unit.is_empty() and not target_unit.get("is_hero", false):
 			# Retícula Carmesí con esquineras de Apuntado/Ataque sobre enemigo
@@ -355,6 +371,7 @@ func _on_attack_lunge_anim(attacker_name: String, target_name: String, _roll: in
 
 func _update_mouse_cursor_shape() -> void:
 	if not tactical_grid or not tactical_grid.is_in_bounds(hovered_cell) or fog_matrix.get(hovered_cell, false):
+		aoe_cells.clear()
 		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
 		return
 
@@ -367,3 +384,16 @@ func _update_mouse_cursor_shape() -> void:
 		Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND)
 	else:
 		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+
+func update_aoe_highlight(center: Vector2i, radius: int) -> void:
+	aoe_cells.clear()
+	if radius <= 0 or not tactical_grid or not tactical_grid.is_in_bounds(center):
+		queue_redraw()
+		return
+
+	for dy in range(-radius, radius + 1):
+		for dx in range(-radius, radius + 1):
+			var cell := center + Vector2i(dx, dy)
+			if tactical_grid.get_distance(center, cell) <= radius:
+				aoe_cells.append(cell)
+	queue_redraw()

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calabozos & Bufones v2.0 - RPG Táctico Grimdark</title>
+    <style>
+        :root {
+            --bg-color: #080a0f;
+            --panel-bg: rgba(18, 22, 32, 0.92);
+            --gold: #d4af37;
+            --gold-bright: #f3e5ab;
+            --crimson: #a82323;
+            --text-main: #e2d9c5;
+            --border-gold: rgba(212, 175, 55, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Cinzel', 'Georgia', serif;
+            line-height: 1.6;
+            background-image: radial-gradient(circle at center, rgba(30, 20, 15, 0.4) 0%, rgba(5, 5, 8, 0.95) 100%);
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            border-bottom: 2px solid var(--border-gold);
+            background: rgba(10, 12, 18, 0.8);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .logo {
+            max-width: 280px;
+            height: auto;
+            filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.4));
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            color: var(--gold-bright);
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0a8b8;
+            font-style: italic;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .hero-banner {
+            background: var(--panel-bg);
+            border: 2px solid var(--border-gold);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .btn-download {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 16px 40px;
+            background: linear-gradient(180deg, #8b1c1c 0%, #520f0f 100%);
+            color: var(--gold-bright);
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-decoration: none;
+            border: 2px solid var(--gold);
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(168, 35, 35, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.8);
+            background: linear-gradient(180deg, #a82323 0%, #6e1313 100%);
+        }
+
+        .grid-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .feature-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-gold);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold-bright);
+        }
+
+        .feature-card h3 {
+            color: var(--gold);
+            font-size: 1.4rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .acts-section {
+            background: var(--panel-bg);
+            border: 2px solid var(--border-gold);
+            border-radius: 12px;
+            padding: 35px;
+            margin-bottom: 50px;
+        }
+
+        .acts-section h2 {
+            color: var(--gold-bright);
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .act-list {
+            list-style: none;
+        }
+
+        .act-item {
+            padding: 15px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .act-item:last-child {
+            border-bottom: none;
+        }
+
+        .act-title {
+            font-weight: bold;
+            color: var(--gold);
+
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            border-top: 1px solid var(--border-gold);
+            color: #7a8292;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>CALABOZOS & BUFONES</h1>
+        <p class="subtitle">RPG Táctico por Turnos Satírico y Grimdark de la Vieja Escuela</p>
+    </header>
+
+    <div class="container">
+        
+        <section class="hero-banner">
+            <h2>⚔️ La Campaña Completa de los 4 Actos de Warhammer</h2>
+            <p style="margin-top: 15px; font-size: 1.1rem; color: #c4ccdc;">
+                Lidera a una banda de héroes mercenarios en su descenso a la oscuridad. Enfrenta a Skavens, Engendros de Nurgle, Pielesverdes y los Elegidos del Caos en un tablero táctico isometrico 2.5D.
+            </p>
+            <a href="https://github.com/ascensof/juego-de-rol-calabozos-bufones" class="btn-download" target="_blank">
+                🔥 Ver Proyecto en GitHub
+            </a>
+        </section>
+
+        <section class="grid-features">
+            <div class="feature-card">
+                <h3>💥 Combate Táctico Táctil</h3>
+                <p>Animaciones procedimentales de embestida física elástica (*Attack Lunge*), miradas carmesí de apuntado y retroalimentación sonora SFX en tiempo real.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🎨 UI Gótica Imperial</h3>
+                <p>Interfaz diegética inspirada en pergaminos, madera y hierro forjado con Party Bar lateral, Action Bar ergonómica y mochila del grupo.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🎲 Herramientas Modo DJ</h3>
+                <p>Sistema de Director de Juego integrado para alterar la niebla de guerra, colocar trampas/cofres y modificar el mapa en caliente.</p>
+            </div>
+        </section>
+
+        <section class="acts-section">
+            <h2>🗺️ Capítulos de la Campaña</h2>
+            <ul class="act-list">
+                <li class="act-item">
+                    <span class="act-title">Acto I: Las Alcantarillas del Reik</span>
+                    <span>Skavens & Ratas Gigantes</span>
+                </li>
+                <li class="act-item">
+                    <span class="act-title">Acto II: El Bosque de las Sombras</span>
+                    <span>Hombres Bestia & Engendros de Nurgle</span>
+                </li>
+                <li class="act-item">
+                    <span class="act-title">Acto III: Las Minas de Karak Kadrin</span>
+                    <span>Lanceros Goblins & Trolls de Piedra</span>
+                </li>
+                <li class="act-item">
+                    <span class="act-title">Acto IV: La Fortaleza de la Disformidad</span>
+                    <span>Guerreros de Khorne & Elegidos del Caos</span>
+                </li>
+            </ul>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>Desarrollado con Godot Engine 4.x | Calabozos & Bufones v2.0</p>
+    </footer>
+
+</body>
+</html>
