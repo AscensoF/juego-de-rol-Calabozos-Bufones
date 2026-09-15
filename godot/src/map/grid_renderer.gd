@@ -8,6 +8,7 @@ var tactical_grid: TacticalGrid
 var fog_matrix: Dictionary = {}
 var reachable_cells: Array[Vector2i] = []
 var hovered_cell: Vector2i = Vector2i(-1, -1)
+var cursor_mode: String = "default" # "default", "move", "attack", "ability"
 var selected_cell: Vector2i = Vector2i(-1, -1)
 var current_path: Array[Vector2i] = []
 var fog_disabled: bool = false
@@ -106,6 +107,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if cell != hovered_cell:
 			hovered_cell = cell
 			_update_hover_path()
+			_update_mouse_cursor_shape()
 			queue_redraw()
 	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		var cell := world_to_grid(event.position)
@@ -251,9 +253,23 @@ func _draw() -> void:
 		draw_rect(sel_rect, Color(1.0, 0.85, 0.2, 0.35), true)
 		draw_rect(sel_rect, Color.GOLD, false, 3.0)
 
+	# 6b. Indicador de Cursor Táctico (Retícula de Ataque / Habilidad / Movimiento)
 	if tactical_grid.is_in_bounds(hovered_cell) and not fog_matrix.get(hovered_cell, false):
 		var hover_rect := Rect2(grid_to_world(hovered_cell), Vector2(tile_size, tile_size))
-		draw_rect(hover_rect, Color(1.0, 1.0, 0.5, 0.5), false, 2.0)
+		var target_unit = tactical_grid.get_unit_at(hovered_cell)
+		
+		if not target_unit.is_empty() and not target_unit.get("is_hero", false):
+			# Retícula Carmesí con esquineras de Apuntado/Ataque sobre enemigo
+			draw_rect(hover_rect, Color(1.0, 0.15, 0.15, 0.7), false, 3.0)
+			draw_line(hover_rect.position, hover_rect.position + Vector2(12, 0), Color.RED, 3.0)
+			draw_line(hover_rect.position, hover_rect.position + Vector2(0, 12), Color.RED, 3.0)
+			draw_line(hover_rect.end, hover_rect.end - Vector2(12, 0), Color.RED, 3.0)
+			draw_line(hover_rect.end, hover_rect.end - Vector2(0, 12), Color.RED, 3.0)
+		elif reachable_cells.has(hovered_cell):
+			# Puntero verde de movimiento seguro
+			draw_rect(hover_rect, Color(0.3, 1.0, 0.4, 0.6), false, 2.5)
+		else:
+			draw_rect(hover_rect, Color(1.0, 1.0, 0.5, 0.5), false, 2.0)
 
 	# 7. Textos flotantes
 	var font := ThemeDB.fallback_font
@@ -336,3 +352,18 @@ func _on_attack_lunge_anim(attacker_name: String, target_name: String, _roll: in
 			queue_redraw()
 		, dir, Vector2.ZERO, 0.18).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		tw.tween_callback(func(): unit_offsets.erase(att_id))
+
+func _update_mouse_cursor_shape() -> void:
+	if not tactical_grid or not tactical_grid.is_in_bounds(hovered_cell) or fog_matrix.get(hovered_cell, false):
+		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+		return
+
+	var target_unit = tactical_grid.get_unit_at(hovered_cell)
+	if not target_unit.is_empty() and not target_unit.get("is_hero", false):
+		# Cursor de Apuntado / Mira de Ataque sobre enemigo
+		Input.set_default_cursor_shape(Input.CURSOR_CROSS)
+	elif reachable_cells.has(hovered_cell):
+		# Cursor de Mano / Navegación
+		Input.set_default_cursor_shape(Input.CURSOR_POINTING_HAND)
+	else:
+		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
