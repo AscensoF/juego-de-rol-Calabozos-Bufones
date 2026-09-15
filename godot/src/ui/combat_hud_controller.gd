@@ -427,6 +427,18 @@ func _populate_combat_action_bar(unit: Dictionary) -> void:
 	var bag_btn := Button.new()
 	bag_btn.custom_minimum_size = Vector2(110, 44)
 	bag_btn.text = "🎒 Mochila"
+
+	# Botón Modo DJ
+	var dj_btn := Button.new()
+	dj_btn.custom_minimum_size = Vector2(100, 44)
+	dj_btn.text = "🎲 Modo DJ"
+	dj_btn.add_theme_font_size_override("font_size", 13)
+	dj_btn.add_theme_stylebox_override("normal", create_grimdark_button_style(Color(0.2, 0.15, 0.08, 0.9), Color(0.9, 0.7, 0.2, 0.9), 6))
+	dj_btn.pressed.connect(func():
+		if game_manager and game_manager.dj_controller:
+			game_manager.dj_controller.visible = not game_manager.dj_controller.visible
+	)
+	abilities_container.add_child(dj_btn)
 	bag_btn.add_theme_font_size_override("font_size", 13)
 	bag_btn.pressed.connect(func():
 		inventory_panel.visible = not inventory_panel.visible
