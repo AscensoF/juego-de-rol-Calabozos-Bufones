@@ -1,6 +1,6 @@
 9cad1ddce9e5a63143ba340c9520626b
-::res://::1789398660
-export_presets.cfg::TextFile::-1::1789053007::0::1::::<><><>0<>0<><>::
+::res://::1789489049
+export_presets.cfg::TextFile::-1::1789489041::0::1::::<><><>0<>0<><>::
 ::res://assets/::1789051068
 ::res://assets/audio/::1789051068
 ::res://assets/audio/music/::1789052191
@@ -29,6 +29,8 @@ throg.png::CompressedTexture2D::7539863011419975976::1789051073::1789052192::1::
 fondo.jpeg::CompressedTexture2D::3107044504681768906::1789051073::1789052195::1::::<><><>0<>0<>be768405cf1218a6e6e212b4e4ae3607<>res://.godot/imported/fondo.jpeg-31d01a956d4c3287baf562c0e0dde08e.ctex::
 logo.jpeg::CompressedTexture2D::3825854372754655349::1789051073::1789052195::1::::<><><>0<>0<>0333d4d3198a0d3f597dec0aca544214<>res://.godot/imported/logo.jpeg-91582a3e18d4affbc4a7e31f3d016432.ctex::
 logo.png::CompressedTexture2D::4734448521823066541::1789052505::1789052509::1::::<><><>0<>0<>bdecf9778dad62634740f82f7517f4e3<>res://.godot/imported/logo.png-64600f0c438a710c7afb9c0c52a1a436.ctex::
+::res://build/::1789489035
+::res://build/mac/::1789489035
 ::res://data/::1789051068
 ::res://data/abilities/::1789381269
 beryl_intervencion_divina.tres::Resource/AbilityData::-1::1789051138::0::1::::<><><>0<>0<><>::res://src/data_classes/ability_data.gd
@@ -61,7 +63,7 @@ goblin_nocturno.tres::Resource/EnemyData::-1::1789397089::0::1::::<><><>0<>0<><>
 guerrero_caos.tres::Resource/EnemyData::-1::1789397090::0::1::::<><><>0<>0<><>::res://src/data_classes/enemy_data.gd<>res://assets/sprites/characters/enemies/caos.png
 limo_toxico.tres::Resource/EnemyData::-1::1789380416::0::1::::<><><>0<>0<><>::res://src/data_classes/enemy_data.gd<>res://assets/sprites/characters/enemies/limo.png
 mimeto_archivo.tres::Resource/EnemyData::-1::1789380417::0::1::::<><><>0<>0<><>::res://src/data_classes/enemy_data.gd<>res://assets/sprites/characters/enemies/mimi.png
-paladin_elegido_caos.tres::Resource/EnemyData::-1::1789397090::0::1::::<><><>0<>0<><>::res://src/data_classes/enemy_data.gd<>res://assets/sprites/characters/enemies/sombra_narrador.png
+paladin_elegido_caos.tres::Resource/EnemyData::-1::1789484206::0::1::::<><><>0<>0<><>::res://src/data_classes/enemy_data.gd<>res://assets/sprites/characters/enemies/caos.png
 rey_orco_karaoke.tres::Resource/EnemyData::-1::1789051153::0::1::::<><><>0<>0<><>::res://src/data_classes/enemy_data.gd<>res://assets/sprites/characters/enemies/rey_orco.png
 troll_piedra.tres::Resource/EnemyData::-1::1789397089::0::1::::<><><>0<>0<><>::res://src/data_classes/enemy_data.gd<>res://assets/sprites/characters/enemies/orco.png
 ::res://data/heroes/::1789381262
@@ -78,7 +80,7 @@ bomba_humo.tres::Resource/ItemData::-1::1789051123::0::1::::<><><>0<>0<><>::res:
 pergamino_fuego.tres::Resource/ItemData::-1::1789051123::0::1::::<><><>0<>0<><>::res://src/data_classes/item_data.gd
 piedra_afilar.tres::Resource/ItemData::-1::1789051123::0::1::::<><><>0<>0<><>::res://src/data_classes/item_data.gd
 pocion_curacion.tres::Resource/ItemData::-1::1789051123::0::1::::<><><>0<>0<><>::res://src/data_classes/item_data.gd
-::res://src/::1789051951
+::res://src/::1789481198
 ::res://src/combat/::1789381954
 combat_invoker.gd::GDScript::7763292031796959899::1789051561::0::1::::CombatInvoker<>RefCounted<><>0<>0<><>::
 combat_rules.gd::GDScript::7002313170527051661::1789381954::0::1::::CombatRules<>RefCounted<><>0<>0<><>::
@@ -92,7 +94,7 @@ item_command.gd::GDScript::7347537700286298872::1789051553::0::1::::ItemCommand<
 move_command.gd::GDScript::352982351066319383::1789058327::0::1::::MoveCommand<>CombatCommand<><>0<>0<><>::
 revive_command.gd::GDScript::8696717236679130490::1789051558::0::1::::ReviveCommand<>CombatCommand<><>0<>0<><>::
 ::res://src/core/::1789382121
-audio_manager.gd::GDScript::2679629398689013934::1789378932::0::1::::<>Node<><>0<>0<><>::
+audio_manager.gd::GDScript::2679629398689013934::1789475598::0::1::::<>Node<><>0<>0<><>::
 enums.gd::GDScript::7320779894863568028::1789123545::0::1::::Enums<>RefCounted<><>0<>0<><>::
 event_bus.gd::GDScript::5175827752525067902::1789382111::0::1::::<>Node<><>0<>0<><>::
 game_manager.gd::GDScript::2342261818330476429::1789397113::0::1::::GameManager<>Node2D<><>0<>0<><>::
@@ -108,7 +110,7 @@ item_data.gd::GDScript::1766585721761663582::1789123470::0::1::::ItemData<>Resou
 dj_mode_controller.gd::GDScript::3791306830394710678::1789111211::0::1::::DJModeController<>Control<><>0<>0<><>::
 ::res://src/map/::1789381503
 combat_vfx.gd::GDScript::5162251676630947781::1789381449::0::1::::CombatVFX<>Node2D<><>0<>0<><>::
-grid_renderer.gd::GDScript::3545062277375837721::1789397130::0::1::::GridRenderer<>Node2D<><>0<>0<><>::
+grid_renderer.gd::GDScript::3545062277375837721::1789488828::0::1::::GridRenderer<>Node2D<><>0<>0<><>::
 tactical_camera.gd::GDScript::4225129761598562395::1789123773::0::1::::TacticalCamera<>Camera2D<><>0<>0<><>::
 ::res://src/pooling/::1789052191
 floating_text.gd::GDScript::2147625086807638825::1789051638::0::1::::FloatingText<>Node2D<><>0<>0<><>::
@@ -134,8 +136,9 @@ dj_mode_state.gd::GDScript::6294948140257241617::1789051327::0::1::::DJModeState
 exploration_state.gd::GDScript::4035091811599087269::1789374714::0::1::::ExplorationState<>State<><>0<>0<><>::
 game_over_state.gd::GDScript::4567540136680376239::1789380437::0::1::::GameOverState<>State<><>0<>0<><>::
 main_menu_state.gd::GDScript::4183432959819545098::1789051306::0::1::::MainMenuState<>State<><>0<>0<><>::
+::res://src/tests/::1789486688
 ::res://src/ui/::1789382180
-combat_hud_controller.gd::GDScript::6222478366601570723::1789398641::0::1::::CombatHUDController<>Control<><>0<>0<><>::
+combat_hud_controller.gd::GDScript::6222478366601570723::1789462339::0::1::::CombatHUDController<>Control<><>0<>0<><>::
 dialogue_box.gd::GDScript::8319132859655559540::1789378372::0::1::::DialogueBox<>Control<><>0<>0<><>::
 dice_visualizer.gd::GDScript::2608445091248256499::1789051652::0::1::::DiceVisualizer<>Control<><>0<>0<><>::
 main_menu.tscn::PackedScene::-1::1789383948::0::1::::<><><>0<>0<><>::res://src/core/game_manager.gd<>res://src/map/grid_renderer.gd<>res://src/pooling/pool_manager.gd<>res://src/state_machine/state_machine.gd<>res://src/state_machine/states/main_menu_state.gd<>res://src/state_machine/states/exploration_state.gd<>res://src/state_machine/states/combat_state.gd<>res://src/state_machine/states/dj_mode_state.gd<>res://src/state_machine/states/game_over_state.gd<>res://src/ui/combat_hud_controller.gd<>res://src/ui/dice_visualizer.gd<>res://src/dj_mode/dj_mode_controller.gd<>res://src/ui/main_menu_controller.gd<>res://assets/sprites/ui/fondo.jpeg<>res://assets/sprites/ui/logo.png

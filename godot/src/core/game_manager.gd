@@ -337,3 +337,43 @@ func _setup_board_for_current_act():
 
 	if EventBus:
 		EventBus.tile_revealed.emit(Vector2i(4, 8), 5)
+
+func generate_act_loot(act_num: int) -> Array[Dictionary]:
+	var loot: Array[Dictionary] = []
+	match act_num:
+		1:
+			loot.append({
+				"id": "item_vial_shallya",
+				"name": "Bálsamo Bendito de Shallya",
+				"type": "heal", "value": 12, "icon": "🧪",
+				"desc": "Sana 12 heridas graves y limpia el estado de Veneno."
+			})
+		2:
+			loot.append({
+				"id": "item_amuleto_sigmar",
+				"name": "Amuelto del Martillo de Sigmar",
+				"type": "equip", "slot": "accessory", "value": 2, "icon": "✝️",
+				"desc": "+2 a la Clase de Armadura (AC) y resistencia a la Disformidad."
+			})
+		3:
+			loot.append({
+				"id": "item_hacha_gromril",
+				"name": "Hacha Forjada en Gromril",
+				"type": "equip", "slot": "weapon", "value": 4, "icon": "🪓",
+				"desc": "+4 al daño físico de combate e ignora armaduras ligeras."
+			})
+		4:
+			loot.append({
+				"id": "item_elixir_aqshy",
+				"name": "Elixir de los Vientos de Aqshy",
+				"type": "resource", "value": 6, "icon": "🔥",
+				"desc": "Restaura 6 puntos de recursos mágicos/furia al instante."
+			})
+	return loot
+
+func grant_chest_loot_for_current_act() -> void:
+	var items = generate_act_loot(current_act_number)
+	for it in items:
+		add_item_to_inventory(it)
+	if EventBus:
+		EventBus.combat_log_appended.emit("<b>🎁 ¡Cofre abierto! Se obtienen objetos de calidad imperial.</b>", "crit")

@@ -83,3 +83,29 @@ static func delete_save(slot: int = 1) -> bool:
 		var err: Error = DirAccess.remove_absolute(path)
 		return err == OK
 	return false
+
+static func auto_save_campaign_progress(act_num: int, inventory: Array, heroes_hp: Dictionary, achievements: Array) -> void:
+	var save_data := {
+		"act_number": act_num,
+		"inventory": inventory,
+		"heroes_hp": heroes_hp,
+		"achievements": achievements,
+		"timestamp": Time.get_datetime_string_from_system()
+	}
+	var file = FileAccess.open("user://campaign_save.json", FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(save_data))
+		file.close()
+		print("SaveSystem: ¡Progreso y logros guardados automáticamente!")
+
+static func load_campaign_progress() -> Dictionary:
+	if not FileAccess.file_exists("user://campaign_save.json"):
+		return {}
+	var file = FileAccess.open("user://campaign_save.json", FileAccess.READ)
+	if not file: return {}
+	var text = file.get_as_text()
+	file.close()
+	var json = JSON.new()
+	if json.parse(text) == OK:
+		return json.get_data()
+	return {}

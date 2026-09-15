@@ -19,7 +19,8 @@ var floating_texts: Array = []
 var fog_reveal_times: Dictionary = {}
 var last_fog_reveal_ms: int = 0
 var flash_units: Dictionary = {}
-var unit_offsets: Dictionary = {} # unit_id -> Vector2 (desplazamiento de ataque)
+var unit_offsets: Dictionary = {}
+var status_effects: Dictionary = {} # unit_id -> Array de estados ["poison", "bleed", "burn"] # unit_id -> Vector2 (desplazamiento de ataque)
 
 # Paleta Grimdark de Alta Calidad (Piedra esculpida, Barrotes de Forja y Antorchas)
 const COLOR_FLOOR_A := Color(0.14, 0.16, 0.20, 1.0)
@@ -264,28 +265,20 @@ func _draw() -> void:
 	# 6b. Indicador de Cursor Táctico (Retícula de Ataque / Habilidad / Movimiento)
 	if tactical_grid.is_in_bounds(hovered_cell) and not fog_matrix.get(hovered_cell, false):
 		var hover_rect := Rect2(grid_to_world(hovered_cell), Vector2(tile_size, tile_size))
-			var hud = get_parent().get_node_or_null("CanvasLayer/CombatHUD") if get_parent() else null
-	var sel_ab = hud.selected_ability if hud else null
-	if sel_ab and sel_ab.area_of_effect > 0:
-		update_aoe_highlight(hovered_cell, sel_ab.area_of_effect)
-	else:
-		aoe_cells.clear()
-		queue_redraw()
-
-	var target_unit = tactical_grid.get_unit_at(hovered_cell)
+		var target_unit = tactical_grid.get_unit_at(hovered_cell)
 		
 		if not target_unit.is_empty() and not target_unit.get("is_hero", false):
-			# Retícula Carmesí con esquineras de Apuntado/Ataque sobre enemigo
 			draw_rect(hover_rect, Color(1.0, 0.15, 0.15, 0.7), false, 3.0)
 			draw_line(hover_rect.position, hover_rect.position + Vector2(12, 0), Color.RED, 3.0)
 			draw_line(hover_rect.position, hover_rect.position + Vector2(0, 12), Color.RED, 3.0)
 			draw_line(hover_rect.end, hover_rect.end - Vector2(12, 0), Color.RED, 3.0)
 			draw_line(hover_rect.end, hover_rect.end - Vector2(0, 12), Color.RED, 3.0)
 		elif reachable_cells.has(hovered_cell):
-			# Puntero verde de movimiento seguro
 			draw_rect(hover_rect, Color(0.3, 1.0, 0.4, 0.6), false, 2.5)
 		else:
 			draw_rect(hover_rect, Color(1.0, 1.0, 0.5, 0.5), false, 2.0)
+
+
 
 	# 7. Textos flotantes
 	var font := ThemeDB.fallback_font
