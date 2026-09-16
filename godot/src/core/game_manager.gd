@@ -135,12 +135,58 @@ func _subscribe_turn_events() -> void:
 
 func _on_turn_ended(_unit: Dictionary) -> void:
 	var heroes_hp := {}
+	var heroes_full: Array = []
 	if tactical_grid:
 		for pos in tactical_grid.units_by_pos:
 			var u = tactical_grid.units_by_pos[pos]
 			if u.get("is_hero", false):
 				heroes_hp[u.get("id", "")] = u.get("hp", 0)
-	SaveSystem.auto_save_campaign_progress(current_act_number, party_inventory, heroes_hp, [], party_gold)
+	for h in party_heroes:
+		if h is HeroData:
+			heroes_full.append({
+				"id": h.id, "level": h.level, "current_xp": h.current_xp,
+				"base_hp": h.base_hp, "base_resource": h.base_resource,
+			})
+	SaveSystem.auto_save_campaign_progress(current_act_number, party_inventory, heroes_hp, [], party_gold, heroes_full)
+
+# Fase 5c: continuar campaña entre sesiones (menú Continuar). Aplica acto,
+# inventario, oro y progresión de héroes; el tablero reanuda con el PV guardado.
+func load_campaign_applied() -> bool:
+	var data := SaveSystem.load_campaign_progress()
+	if data.is_empty():
+		return false
+	current_act_number = int(data.get("act_number", 1))
+	party_inventory.clear()
+	for it in data.get("inventory", []):
+		if it is Dictionary:
+			party_inventory.append(it)
+	party_gold = int(data.get("party_gold", 0))
+	var saved_heroes: Array = data.get("heroes_full", [])
+	if not saved_heroes.is_empty():
+		for h in party_heroes:
+			if not (h is HeroData):
+				continue
+			for sh in saved_heroes:
+				if sh is Dictionary and sh.get("id", "") == h.id:
+					h.level = int(sh.get("level", h.level))
+					h.current_xp = int(sh.get("current_xp", h.current_xp))
+					h.base_hp = int(sh.get("base_hp", h.base_hp))
+					h.base_resource = int(sh.get("base_resource", h.base_resource))
+	if EventBus:
+		EventBus.inventory_updated.emit(party_inventory)
+	_load_act(current_act_number)
+	_apply_saved_hp(data.get("heroes_hp", {}))
+	return true
+
+func _apply_saved_hp(heroes_hp: Dictionary) -> void:
+	if tactical_grid == null or heroes_hp.is_empty():
+		return
+	for pos in tactical_grid.units_by_pos:
+		var u = tactical_grid.units_by_pos[pos]
+		if u.get("is_hero", false) and heroes_hp.has(u.get("id", "")):
+			u["hp"] = clampi(int(heroes_hp[u.get("id", "")]), 1, int(u.get("hpmax", 1)))
+			if EventBus:
+				EventBus.health_updated.emit(u.get("id", ""), u["hp"], u.get("hpmax", 1), 0)
 
 func _on_item_used(item_id: String, user_id: String) -> void:
 	var item_dict: Dictionary = {}

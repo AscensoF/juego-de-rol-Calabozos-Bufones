@@ -248,6 +248,10 @@ func _execute_enemy_ai_turn() -> void:
 	next_turn()
 
 func _on_cell_clicked(grid_pos: Vector2i) -> void:
+	# Fase 5c: el DJ coloca antes que cualquier lógica de combate.
+	if EventBus and EventBus.dj_spawn_path != "":
+		_dj_place_at(grid_pos)
+		return
 	if not current_unit.get("is_hero", false): return
 	if current_unit.get("has_acted", false): return
 	if is_resolving: return
@@ -289,6 +293,22 @@ func _resolve_attack(attacker: Dictionary, target: Dictionary) -> void:
 	else:
 		var cmd := AttackCommand.new(attacker, target, grid)
 		cmd.execute()
+
+# Fase 5c: colocación DJ con click (consume el intercept). NOTA: el invocado
+# entra en el grid; si hay combate abierto, re-iniciar el encuentro para incluirlo.
+func _dj_place_at(grid_pos: Vector2i) -> void:
+	var game_manager = state_machine.get_parent()
+	var grid = game_manager.tactical_grid if game_manager else null
+	if grid == null:
+		return
+	var token := ActLoader.spawn_enemy_at(grid, EventBus.dj_spawn_path, grid_pos)
+	EventBus.dj_spawn_path = ""
+	if token.is_empty():
+		if EventBus: EventBus.combat_log_appended.emit("[DJ] Celda no válida para invocar.", "info")
+		return
+	if EventBus:
+		EventBus.combat_log_appended.emit("[DJ] Invocado %s en [%d, %d]." % [token["name"], grid_pos.x, grid_pos.y], "crit")
+		EventBus.redraw_requested.emit()
 
 func _compute_combat_centroid() -> Vector2i:
 	var sum := Vector2i.ZERO

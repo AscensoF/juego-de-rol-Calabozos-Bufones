@@ -31,5 +31,16 @@ func continue_game(save_data: Dictionary) -> void:
 		"is_new_game": false
 	})
 
+# Fase 5c: continuar desde el autosave de campaña (botón Continuar del menú).
+func continue_from_campaign() -> bool:
+	var gm = state_machine.get_parent()
+	if gm and gm.has_method("load_campaign_applied") and gm.load_campaign_applied():
+		state_machine.change_state(Enums.GameFlowState.EXPLORATION, {
+			"is_new_game": false,
+			"continued": true
+		})
+		return true
+	return false
+
 func exit() -> void:
 	pass

@@ -111,6 +111,24 @@ static func build_enemy_token(data: EnemyData, unit_id: String, display_name: St
 		"is_alive": true,
 	}
 
+# Fase 5c: invocación puntual por datos (Modo DJ). Devuelve el token o {}.
+static func spawn_enemy_at(grid: TacticalGrid, data_path: String, pos: Vector2i, id_prefix: String = "dj_enemy") -> Dictionary:
+	if grid == null:
+		return {}
+	var data: EnemyData = load(data_path) as EnemyData
+	if data == null:
+		push_error("[ActLoader] Enemigo no cargable: %s" % data_path)
+		return {}
+	if not grid.is_in_bounds(pos):
+		return {}
+	if grid.get_cell_type(pos) == Enums.CellType.WALL:
+		return {}
+	if grid.units_by_pos.has(pos):
+		return {}
+	var token := build_enemy_token(data, "%s_%d" % [id_prefix, Time.get_ticks_msec()], data.enemy_name)
+	grid.register_unit(token, pos)
+	return token
+
 static func setup_board(grid: TacticalGrid, act_data: ActData) -> void:
 	if grid == null or act_data == null:
 		push_error("[ActLoader] setup_board con grid o act_data nulos.")

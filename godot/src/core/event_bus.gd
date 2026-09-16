@@ -38,4 +38,8 @@ signal dialogue_requested(lines: Array)
 signal dialogue_finished()
 signal turn_banner_announced(title: String, subtitle: String, is_hero: bool)
 # Fase 5: solicitud genérica de redibujado (herramientas DJ) sin acoplar vistas.
+# Fase 5c: intercept de colocación DJ (ruta .tres armada o "" = desarmado).
+# Los estados consultan este flag antes de procesar clicks en celda.
+var dj_spawn_path: String = ""
+
 signal redraw_requested()

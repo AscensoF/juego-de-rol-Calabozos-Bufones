@@ -84,6 +84,10 @@ func _get_reachable_cells(start_pos: Vector2i, max_speed: int) -> Array[Vector2i
 	return reachable
 
 func _on_cell_clicked(grid_pos: Vector2i) -> void:
+	# Fase 5c: el DJ coloca antes que cualquier lógica de héroe.
+	if EventBus and EventBus.dj_spawn_path != "":
+		_dj_place_at(grid_pos)
+		return
 	if is_moving_hero: return
 	if grid_pos.x < 0 or grid_pos.x >= GRID_WIDTH or grid_pos.y < 0 or grid_pos.y >= GRID_HEIGHT: return
 
@@ -210,6 +214,21 @@ func _check_for_combat(hero_pos: Vector2i) -> void:
 	print("ExplorationState: ¡Enemigo a la vista! Iniciando combate...")
 	EventBus.combat_log_appended.emit("¡%s os ha detectado! ¡A las armas!" % nearby_enemy.get("name", "El enemigo"), "crit")
 	state_machine.change_state(Enums.GameFlowState.COMBAT, {"heroes": heroes, "enemies": enemies})
+
+# Fase 5c: colocación DJ con click (consume el intercept).
+func _dj_place_at(grid_pos: Vector2i) -> void:
+	var game_manager = state_machine.get_parent()
+	var grid = game_manager.tactical_grid if game_manager else null
+	if grid == null:
+		return
+	var token := ActLoader.spawn_enemy_at(grid, EventBus.dj_spawn_path, grid_pos)
+	EventBus.dj_spawn_path = ""
+	if token.is_empty():
+		if EventBus: EventBus.combat_log_appended.emit("[DJ] Celda no válida para invocar.", "info")
+		return
+	if EventBus:
+		EventBus.combat_log_appended.emit("[DJ] Invocado %s en [%d, %d]." % [token["name"], grid_pos.x, grid_pos.y], "crit")
+		EventBus.redraw_requested.emit()
 
 func reveal_fog_around(center: Vector2i, radius: int) -> void:
 	if EventBus: EventBus.tile_revealed.emit(center, radius)

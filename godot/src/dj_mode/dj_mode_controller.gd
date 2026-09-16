@@ -84,6 +84,16 @@ func _build_ui() -> void:
 	btn_spawn.pressed.connect(_on_spawn_pressed)
 	vbox.add_child(btn_spawn)
 
+	var btn_place := Button.new()
+	btn_place.text = "◎ Armar Colocación (siguiente click)"
+	btn_place.tooltip_text = "El próximo click en la mazmorra invoca al monstruo ahí."
+	btn_place.pressed.connect(func():
+		if EventBus:
+			EventBus.dj_spawn_path = selected_spawn_path
+			EventBus.combat_log_appended.emit("[DJ] Colocación armada: toca una celda libre.", "info")
+	)
+	vbox.add_child(btn_place)
+
 	check_fog = CheckBox.new()
 	check_fog.text = "Desactivar Niebla de Guerra"
 	check_fog.toggled.connect(_on_fog_toggled)
@@ -154,18 +164,15 @@ func _on_spawn_pressed() -> void:
 	var grid := _find_grid()
 	if grid == null:
 		return
-	var data: EnemyData = load(selected_spawn_path) as EnemyData
-	if data == null:
-		push_error("[DJ] No se pudo cargar: %s" % selected_spawn_path)
-		return
 	var cell := _find_free_cell(grid)
 	if cell == Vector2i(-1, -1):
 		if EventBus: EventBus.combat_log_appended.emit("[DJ] Sin celdas libres para invocar.", "info")
 		return
-	var token := ActLoader.build_enemy_token(data, "dj_enemy_%d" % Time.get_ticks_msec(), data.enemy_name)
-	grid.register_unit(token, cell)
+	var token := ActLoader.spawn_enemy_at(grid, selected_spawn_path, cell)
+	if token.is_empty():
+		return
 	if EventBus:
-		EventBus.combat_log_appended.emit("[DJ] Invocado %s en [%d, %d]." % [data.enemy_name, cell.x, cell.y], "crit")
+		EventBus.combat_log_appended.emit("[DJ] Invocado %s en [%d, %d]." % [token["name"], cell.x, cell.y], "crit")
 		EventBus.redraw_requested.emit()
 
 func _find_free_cell(grid: TacticalGrid) -> Vector2i:

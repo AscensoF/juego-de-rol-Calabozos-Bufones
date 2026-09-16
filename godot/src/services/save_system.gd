@@ -139,13 +139,14 @@ static func delete_save(slot: int = 1) -> bool:
 		return err == OK
 	return false
 
-static func auto_save_campaign_progress(act_num: int, inventory: Array, heroes_hp: Dictionary, achievements: Array, party_gold: int = 0) -> void:
+static func auto_save_campaign_progress(act_num: int, inventory: Array, heroes_hp: Dictionary, achievements: Array, party_gold: int = 0, heroes_full: Array = []) -> void:
 	var save_data := {
 		"act_number": act_num,
 		"inventory": inventory,
 		"heroes_hp": heroes_hp,
 		"achievements": achievements,
 		"party_gold": party_gold,
+		"heroes_full": heroes_full,
 		"timestamp": Time.get_datetime_string_from_system()
 	}
 	# Fase 1: la campaña también va cifrada (antes user://campaign_save.json en claro).
@@ -153,6 +154,10 @@ static func auto_save_campaign_progress(act_num: int, inventory: Array, heroes_h
 		if FileAccess.file_exists(CAMPAIGN_LEGACY_PATH):
 			DirAccess.remove_absolute(CAMPAIGN_LEGACY_PATH)
 		print("SaveSystem: ¡Progreso y logros guardados automáticamente (cifrado)!")
+
+# Fase 5c: ¿hay campaña que continuar? (para el botón Continuar del menú).
+static func has_campaign_save() -> bool:
+	return FileAccess.file_exists(CAMPAIGN_CRYPT_PATH) or FileAccess.file_exists(CAMPAIGN_LEGACY_PATH)
 
 static func load_campaign_progress() -> Dictionary:
 	if FileAccess.file_exists(CAMPAIGN_CRYPT_PATH):
@@ -176,6 +181,7 @@ static func load_campaign_progress() -> Dictionary:
 			"heroes_hp": data.get("heroes_hp", {}),
 			"achievements": data.get("achievements", {}),
 			"party_gold": data.get("party_gold", 0),
+			"heroes_full": data.get("heroes_full", []),
 			"timestamp": data.get("timestamp", "")
 		}
 		_write_payload(CAMPAIGN_CRYPT_PATH, migrated)
