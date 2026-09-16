@@ -13,12 +13,9 @@ func enter(params: Dictionary = {}) -> void:
 
 func start_new_game(act_resource_path: String = "res://data/acts/act_01_taberna.tres") -> void:
 	var act_data: ActData = load(act_resource_path) as ActData
-	var heroes: Array[HeroData] = [
-		load("res://data/heroes/throg.tres") as HeroData,
-		load("res://data/heroes/elowen.tres") as HeroData,
-		load("res://data/heroes/grimble.tres") as HeroData,
-		load("res://data/heroes/beryl.tres") as HeroData
-	]
+	# Fase 1: roster canon único vía ActLoader (antes roster satírico distinto
+	# al de game_manager.gd).
+	var heroes: Array = ActLoader.load_party()
 
 	var transition_data := {
 		"act": act_data,

@@ -58,45 +58,38 @@ func get_neighbors(pos: Vector2i) -> Array[Vector2i]:
 			neighbors.append(n)
 	return neighbors
 
+## Fase 1: A* nativo (AStarGrid2D, C++) en vez de frontera ordenada en GDScript.
+## Misma API y semántica: ortogonal, respeta muros y unidades vivas,
+## goal debe ser alcanzable, start==goal devuelve [start],
+## caminos de más de max_distance se rechazan.
 func find_path(start: Vector2i, goal: Vector2i, max_distance: int = 999) -> Array[Vector2i]:
 	if not is_walkable(goal, start): return []
 	if start == goal: return [start]
 
-	var frontier: Array[Vector2i] = [start]
-	var came_from: Dictionary = {start: null}
-	var cost_so_far: Dictionary = {start: 0}
+	var astar := AStarGrid2D.new()
+	astar.region = Rect2i(0, 0, WIDTH, HEIGHT)
+	astar.cell_size = Vector2(1, 1)
+	astar.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
+	astar.update()
 
-	while not frontier.is_empty():
-		frontier.sort_custom(func(a, b):
-			var f_a = cost_so_far[a] + get_distance(a, goal)
-			var f_b = cost_so_far[b] + get_distance(b, goal)
-			return f_a < f_b
-		)
-		var current = frontier.pop_front()
+	for y in HEIGHT:
+		for x in WIDTH:
+			var p := Vector2i(x, y)
+			if p == start or p == goal:
+				astar.set_point_solid(p, false)
+			elif not is_walkable(p, start):
+				astar.set_point_solid(p, true)
 
-		if current == goal:
-			break
-
-		for next in get_neighbors(current):
-			if not is_walkable(next, start) and next != goal:
-				continue
-			var new_cost = cost_so_far[current] + 1
-			if new_cost > max_distance:
-				continue
-			if not cost_so_far.has(next) or new_cost < cost_so_far[next]:
-				cost_so_far[next] = new_cost
-				came_from[next] = current
-				frontier.append(next)
-
-	if not came_from.has(goal):
+	var id_path: PackedVector2Array = astar.get_id_path(start, goal)
+	if id_path.is_empty():
 		return []
 
 	var path: Array[Vector2i] = []
-	var curr = goal
-	while curr != null:
-		path.append(curr)
-		curr = came_from[curr]
-	path.reverse()
+	for v in id_path:
+		path.append(Vector2i(v))
+
+	if path.size() - 1 > max_distance:
+		return []
 	return path
 
 func register_unit(unit_data: Dictionary, pos: Vector2i) -> void:

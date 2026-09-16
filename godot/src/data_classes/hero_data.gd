@@ -23,3 +23,10 @@ extends Resource
 @export var attributes: CharacterAttributes
 @export var abilities: Array[AbilityData] = []
 @export var starting_inventory: Array[ItemData] = []
+
+@export_group("Progresión (canon Warhammer — Fase 1)")
+@export_multiline var lore_bio: String = ""
+@export var level: int = 1
+@export var current_xp: int = 0
+@export var xp_to_next_level: int = 100
+@export var gold: int = 0
