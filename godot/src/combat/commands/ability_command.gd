@@ -136,6 +136,21 @@ func _execute_warhammer_ability() -> void:
 			target["buffs"] = t_buffs
 			if EventBus: EventBus.combat_log_appended.emit("¡Escudo de Fe! %s recupera %d PV y queda defendido (+4 CA, %d turnos)." % [target.get("name", "el aliado"), ward_heal, ward_rounds], "heal")
 
+		"ab_mofa":
+			# Mofa Bufonesca (innata, coste 0): provoca al enemigo — +2 ataque
+			# pero -2 CA para él (furia ciega, ver CombatRules). Contenido clipeable.
+			var mofas := [
+				"¡Tu armadura la forjó un herrero ciego!",
+				"¡He visto limos con mejor linaje que el tuyo!",
+				"¿Eso es un hacha o un abanico?",
+				"¡El Narrador me ha contado tu final y es vergonzoso!",
+			]
+			var mofa_text: String = mofas[randi() % mofas.size()]
+			var e_buffs: Array = target.get("buffs", [])
+			e_buffs.append({"type": Enums.StatusEffectType.TAUNTED, "duration": maxi(1, ability.status_duration_turns)})
+			target["buffs"] = e_buffs
+			if EventBus: EventBus.combat_log_appended.emit("🤡 %s se burla de %s: «%s» ¡Enloquece de furia!" % [actor.get("name", "El héroe"), target.get("name", "el enemigo"), mofa_text], "crit")
+
 		_:
 			var res := CombatRules.resolve_attack(actor, target, grid, ability.damage_dice_count, ability.damage_dice_sides, ability.damage_flat_bonus)
 			if res["is_hit"]:

@@ -66,6 +66,7 @@ func _subscribe_events() -> void:
 	EventBus.health_updated.connect(_on_health_updated_flash)
 	EventBus.attack_resolved.connect(_on_attack_lunge_anim)
 	EventBus.attack_resolved.connect(_on_attack_vfx)
+	EventBus.redraw_requested.connect(queue_redraw)
 
 func _on_attack_vfx(_attacker: String, target_name: String, _roll: int, _mod: int, _total: int, _ac: int, is_hit: bool, is_crit: bool, _fumble: bool, damage: int) -> void:
 	if not is_hit or damage <= 0: return

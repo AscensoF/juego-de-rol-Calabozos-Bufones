@@ -17,6 +17,9 @@ static func calculate_effective_ac(target: Dictionary, attacker_pos: Vector2i, g
 	for b in target.get("buffs", []):
 		if b.get("type", -1) == Enums.StatusEffectType.DEFENDING:
 			buff_bonus += 4
+		elif b.get("type", -1) == Enums.StatusEffectType.TAUNTED:
+			# Fase 5 (Mofa): el provocado baja la guardia (-2 CA, furia ciega).
+			buff_bonus -= 2
 		elif b.has("ac"):
 			buff_bonus += b["ac"]
 
@@ -40,6 +43,12 @@ static func get_attack_modifier(attacker: Dictionary) -> int:
 	else:
 		if attacker.has("data") and attacker["data"] is EnemyData:
 			mod = attacker["data"].attack_bonus
+
+	# Fase 5 (Mofa): el provocado pega con furia (+2 ataque).
+	for b in attacker.get("buffs", []):
+		if b.get("type", -1) == Enums.StatusEffectType.TAUNTED:
+			mod += 2
+			break
 
 	return mod
 

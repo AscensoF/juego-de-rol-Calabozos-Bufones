@@ -1,10 +1,11 @@
-[gd_resource type="Resource" script_class="HeroData" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="HeroData" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://src/data_classes/hero_data.gd" id="1_hero"]
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/heroes/beryl.png" id="2_portrait"]
 [ext_resource type="Resource" path="res://data/abilities/plegaria_sigmar.tres" id="3_ab"]
 [ext_resource type="Resource" path="res://data/abilities/martillo_sigmar.tres" id="4_ab"]
 [ext_resource type="Resource" path="res://data/abilities/escudo_fe.tres" id="5_ab"]
+[ext_resource type="Resource" path="res://data/abilities/mofa.tres" id="6_ab"]
 
 [resource]
 script = ExtResource("1_hero")
@@ -22,4 +23,4 @@ current_xp = 0
 xp_to_next_level = 100
 gold = 20
 lore_bio = "Sacerdotisa Guerrera del Templo de Sigmar. Su martillo y sus plegarias aplastan la corrupción y sanan las heridas."
-abilities = Array[Resource]([ExtResource("3_ab"), ExtResource("4_ab"), ExtResource("5_ab")])
+abilities = Array[Resource]([ExtResource("3_ab"), ExtResource("4_ab"), ExtResource("5_ab"), ExtResource("6_ab")])

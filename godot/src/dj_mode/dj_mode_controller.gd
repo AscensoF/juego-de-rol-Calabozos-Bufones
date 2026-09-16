@@ -95,10 +95,49 @@ func _on_fog_toggled(toggled_on: bool) -> void:
 	if EventBus: EventBus.dj_fog_cleared.emit(toggled_on)
 
 func _on_heal_party_pressed() -> void:
-	if EventBus: EventBus.combat_log_appended.emit("[DJ Cheat] Todos los héroes han sido sanados por completo.", "heal")
+	# Fase 5: efecto real sobre el grid (antes solo log). Héroes vivos al máximo.
+	var grid := _find_grid()
+	if grid == null:
+		return
+	var healed := 0
+	for pos in grid.units_by_pos:
+		var u = grid.units_by_pos[pos]
+		if u.get("is_hero", false) and u.get("is_alive", false):
+			var delta: int = int(u.get("hp_max", u.get("hp", 0))) - int(u.get("hp", 0))
+			u["hp"] = u.get("hp_max", u.get("hp", 0))
+			healed += 1
+			if EventBus:
+				EventBus.health_updated.emit(u.get("id", ""), u["hp"], u.get("hp_max", 0), delta)
+				EventBus.floating_text_requested.emit("+%d HP" % delta, Color.GREEN, pos)
+	if EventBus:
+		EventBus.combat_log_appended.emit("[DJ] %d héroes sanados por completo." % healed, "heal")
+		EventBus.redraw_requested.emit()
 
 func _on_kill_enemies_pressed() -> void:
-	if EventBus: EventBus.combat_log_appended.emit("[DJ Cheat] Aberraciones eliminadas por el Director del Caos.", "crit")
+	# Fase 5: efecto real sobre el grid (antes solo log). NOTA: en combate las
+	# listas de CombatState son copias — el DJ actúa sobre la verdad de
+	# exploración; usar fuera de combate o re-iniciar el encuentro.
+	var grid := _find_grid()
+	if grid == null:
+		return
+	var slain := 0
+	for pos in grid.units_by_pos:
+		var u = grid.units_by_pos[pos]
+		if not u.get("is_hero", false) and u.get("is_alive", false):
+			u["is_alive"] = false
+			u["hp"] = 0
+			slain += 1
+			if EventBus:
+				EventBus.unit_defeated.emit(u.get("id", ""), false, 0)
+	if EventBus:
+		EventBus.combat_log_appended.emit("[DJ] %d aberraciones eliminadas por el Director del Caos." % slain, "crit")
+		EventBus.redraw_requested.emit()
+
+func _find_grid() -> TacticalGrid:
+	var gm = get_tree().get_root().get_node_or_null("MainGame")
+	if gm == null:
+		return null
+	return gm.get("tactical_grid") as TacticalGrid
 
 func _on_close_pressed() -> void:
 	if EventBus: EventBus.dj_mode_toggled.emit(false)

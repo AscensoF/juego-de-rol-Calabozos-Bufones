@@ -37,3 +37,5 @@ signal inventory_updated(items: Array)
 signal dialogue_requested(lines: Array)
 signal dialogue_finished()
 signal turn_banner_announced(title: String, subtitle: String, is_hero: bool)
+# Fase 5: solicitud genérica de redibujado (herramientas DJ) sin acoplar vistas.
+signal redraw_requested()
