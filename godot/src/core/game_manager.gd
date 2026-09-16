@@ -17,6 +17,19 @@ var dialogue_box: DialogueBox
 
 var current_act_number: int = 1
 var party_inventory: Array[Dictionary] = []
+# Fase 4: economía del Campamento (sesión; persistencia entre sesiones: backlog).
+var party_gold: int = 0
+
+func add_party_gold(amount: int) -> void:
+	party_gold = maxi(0, party_gold + amount)
+
+func spend_party_gold(amount: int) -> bool:
+	if party_gold < amount:
+		if EventBus:
+			EventBus.combat_log_appended.emit("Oro insuficiente (%dg, necesitas %dg)." % [party_gold, amount], "info")
+		return false
+	party_gold -= amount
+	return true
 
 func _ready():
 	RenderingServer.set_default_clear_color(Color(0.03, 0.04, 0.07, 1.0))
@@ -127,7 +140,7 @@ func _on_turn_ended(_unit: Dictionary) -> void:
 			var u = tactical_grid.units_by_pos[pos]
 			if u.get("is_hero", false):
 				heroes_hp[u.get("id", "")] = u.get("hp", 0)
-	SaveSystem.auto_save_campaign_progress(current_act_number, party_inventory, heroes_hp, [])
+	SaveSystem.auto_save_campaign_progress(current_act_number, party_inventory, heroes_hp, [], party_gold)
 
 func _on_item_used(item_id: String, user_id: String) -> void:
 	var item_dict: Dictionary = {}

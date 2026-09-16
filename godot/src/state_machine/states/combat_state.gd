@@ -335,7 +335,7 @@ func check_battle_end() -> bool:
 			EventBus.combat_ended.emit(true)
 			EventBus.combat_log_appended.emit("<b>¡Victoria! Amenazas purgadas. Ganáis %d XP.</b>" % total_xp, "heal")
 
-		state_machine.change_state(Enums.GameFlowState.GAME_OVER, {"victory": true})
+		state_machine.change_state(Enums.GameFlowState.GAME_OVER, {"victory": true, "total_xp": total_xp})
 		return true
 
 	return false

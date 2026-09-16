@@ -139,12 +139,13 @@ static func delete_save(slot: int = 1) -> bool:
 		return err == OK
 	return false
 
-static func auto_save_campaign_progress(act_num: int, inventory: Array, heroes_hp: Dictionary, achievements: Array) -> void:
+static func auto_save_campaign_progress(act_num: int, inventory: Array, heroes_hp: Dictionary, achievements: Array, party_gold: int = 0) -> void:
 	var save_data := {
 		"act_number": act_num,
 		"inventory": inventory,
 		"heroes_hp": heroes_hp,
 		"achievements": achievements,
+		"party_gold": party_gold,
 		"timestamp": Time.get_datetime_string_from_system()
 	}
 	# Fase 1: la campaña también va cifrada (antes user://campaign_save.json en claro).
@@ -174,6 +175,7 @@ static func load_campaign_progress() -> Dictionary:
 			"inventory": data.get("inventory", []),
 			"heroes_hp": data.get("heroes_hp", {}),
 			"achievements": data.get("achievements", {}),
+			"party_gold": data.get("party_gold", 0),
 			"timestamp": data.get("timestamp", "")
 		}
 		_write_payload(CAMPAIGN_CRYPT_PATH, migrated)
