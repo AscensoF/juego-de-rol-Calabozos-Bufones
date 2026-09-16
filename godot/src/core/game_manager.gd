@@ -135,19 +135,21 @@ func _subscribe_turn_events() -> void:
 
 func _on_turn_ended(_unit: Dictionary) -> void:
 	var heroes_hp := {}
+	var heroes_pos := {}
 	var heroes_full: Array = []
 	if tactical_grid:
 		for pos in tactical_grid.units_by_pos:
 			var u = tactical_grid.units_by_pos[pos]
 			if u.get("is_hero", false):
 				heroes_hp[u.get("id", "")] = u.get("hp", 0)
+				heroes_pos[u.get("id", "")] = [pos.x, pos.y]
 	for h in party_heroes:
 		if h is HeroData:
 			heroes_full.append({
 				"id": h.id, "level": h.level, "current_xp": h.current_xp,
 				"base_hp": h.base_hp, "base_resource": h.base_resource,
 			})
-	SaveSystem.auto_save_campaign_progress(current_act_number, party_inventory, heroes_hp, [], party_gold, heroes_full)
+	SaveSystem.auto_save_campaign_progress(current_act_number, party_inventory, heroes_hp, [], party_gold, heroes_full, heroes_pos)
 
 # Fase 5c: continuar campaña entre sesiones (menú Continuar). Aplica acto,
 # inventario, oro y progresión de héroes; el tablero reanuda con el PV guardado.
@@ -176,7 +178,37 @@ func load_campaign_applied() -> bool:
 		EventBus.inventory_updated.emit(party_inventory)
 	_load_act(current_act_number)
 	_apply_saved_hp(data.get("heroes_hp", {}))
+	_apply_saved_positions(data.get("heroes_pos", {}))
 	return true
+
+# Fase 5c-fix: recoloca a los héroes donde estaban (el tablero se reconstruye
+# en la entrada del acto). Destino inválido/ocupado → posición inicial del acto.
+func _apply_saved_positions(heroes_pos: Dictionary) -> void:
+	if tactical_grid == null or heroes_pos.is_empty():
+		return
+	for i in party_heroes.size():
+		var hid := "hero_" + str(i)
+		if not heroes_pos.has(hid):
+			continue
+		var saved: Array = heroes_pos[hid]
+		if saved.size() < 2:
+			continue
+		var dest := Vector2i(int(saved[0]), int(saved[1]))
+		var current: Vector2i = tactical_grid.pos_by_unit_id.get(hid, Vector2i(-1, -1))
+		if current == Vector2i(-1, -1) or current == dest:
+			continue
+		var ok := tactical_grid.is_in_bounds(dest) \
+			and tactical_grid.get_cell_type(dest) != Enums.CellType.WALL \
+			and not tactical_grid.units_by_pos.has(dest)
+		if ok:
+			var token: Dictionary = tactical_grid.units_by_pos.get(current, {})
+			tactical_grid.units_by_pos.erase(current)
+			tactical_grid.units_by_pos[dest] = token
+			tactical_grid.pos_by_unit_id[hid] = dest
+			if EventBus:
+				EventBus.tile_revealed.emit(dest, 6)
+	if EventBus:
+		EventBus.redraw_requested.emit()
 
 func _apply_saved_hp(heroes_hp: Dictionary) -> void:
 	if tactical_grid == null or heroes_hp.is_empty():

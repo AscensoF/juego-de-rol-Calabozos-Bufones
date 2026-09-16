@@ -81,14 +81,21 @@ static func _parse_and_verify(content: String) -> Dictionary:
 		return {}
 	return raw_data
 
+# Fase 5c-fix: JSON convierte enteros a float al leer (1 → 1.0), lo que
+# cambiaba el string firmado y TODA carga fallaba por "integridad".
+# Se firma y almacena la forma normalizada (roundtrip idempotente).
+static func _canonical_string(save_data: Dictionary) -> String:
+	var normalized: Variant = JSON.parse_string(JSON.stringify(save_data))
+	return JSON.stringify(normalized)
+
 static func _write_payload(path: String, save_data: Dictionary) -> bool:
-	var json_string: String = JSON.stringify(save_data)
-	var signature: String = (json_string + SALT).sha256_text()
+	var canonical_data: Variant = JSON.parse_string(_canonical_string(save_data))
+	var signature: String = (_canonical_string(save_data) + SALT).sha256_text()
 	var payload := {
 		"version": 2,
 		"timestamp": Time.get_unix_time_from_system(),
 		"signature": signature,
-		"data": save_data
+		"data": canonical_data
 	}
 	var file := FileAccess.open_encrypted_with_pass(path, FileAccess.WRITE, _get_key())
 	if not file:
@@ -139,7 +146,7 @@ static func delete_save(slot: int = 1) -> bool:
 		return err == OK
 	return false
 
-static func auto_save_campaign_progress(act_num: int, inventory: Array, heroes_hp: Dictionary, achievements: Array, party_gold: int = 0, heroes_full: Array = []) -> void:
+static func auto_save_campaign_progress(act_num: int, inventory: Array, heroes_hp: Dictionary, achievements: Array, party_gold: int = 0, heroes_full: Array = [], heroes_pos: Dictionary = {}) -> void:
 	var save_data := {
 		"act_number": act_num,
 		"inventory": inventory,
@@ -147,6 +154,7 @@ static func auto_save_campaign_progress(act_num: int, inventory: Array, heroes_h
 		"achievements": achievements,
 		"party_gold": party_gold,
 		"heroes_full": heroes_full,
+		"heroes_pos": heroes_pos,
 		"timestamp": Time.get_datetime_string_from_system()
 	}
 	# Fase 1: la campaña también va cifrada (antes user://campaign_save.json en claro).
@@ -182,6 +190,7 @@ static func load_campaign_progress() -> Dictionary:
 			"achievements": data.get("achievements", {}),
 			"party_gold": data.get("party_gold", 0),
 			"heroes_full": data.get("heroes_full", []),
+			"heroes_pos": data.get("heroes_pos", {}),
 			"timestamp": data.get("timestamp", "")
 		}
 		_write_payload(CAMPAIGN_CRYPT_PATH, migrated)
