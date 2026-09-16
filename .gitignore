@@ -1,3 +1,13 @@
 .DS_Store
 *.tmp
 godot/.godot/
+
+# Fase 0: artefactos de build Store / Web (no versionar binarios)
+*.pck
+*.aab
+*.ipa
+*.zip
+godot/build/web/
+godot/build/android/
+godot/build/ios/
+legacy/web/.DS_Store
