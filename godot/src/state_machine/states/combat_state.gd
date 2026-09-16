@@ -141,6 +141,8 @@ func start_turn(index: int) -> void:
 	has_acted = false
 	is_resolving = false
 
+	_tick_unit_buffs(current_unit)
+
 	_highlight_current_unit()
 
 	var is_hero: bool = current_unit.get("is_hero", false)
@@ -158,6 +160,22 @@ func start_turn(index: int) -> void:
 
 	if not is_hero:
 		_execute_enemy_ai_turn()
+
+# Fase 5b: los buffs caducan al inicio del turno del portador (DEFENDING,
+# TAUNTED y SHARPENED eran permanentes). Formato: {"type", "duration"}.
+func _tick_unit_buffs(unit: Dictionary) -> void:
+	var buffs: Array = unit.get("buffs", [])
+	if buffs.is_empty():
+		return
+	var kept: Array = []
+	for b in buffs:
+		var left: int = int(b.get("duration", 1)) - 1
+		if left > 0:
+			b["duration"] = left
+			kept.append(b)
+		elif EventBus:
+			EventBus.status_removed.emit(unit.get("id", ""), int(b.get("type", -1)))
+	unit["buffs"] = kept
 
 func _highlight_current_unit() -> void:
 	var gm = state_machine.get_parent()

@@ -11,8 +11,23 @@ var check_fog: CheckBox
 var btn_close: Button
 
 var selected_cell_type: Enums.CellType = Enums.CellType.WALL
-var selected_enemy_kind: Enums.EnemyKind = Enums.EnemyKind.GOBLIN_BUROCRATA
+var selected_spawn_path: String = "res://data/enemies/goblin_burocrata.tres"
 var is_active: bool = false
+
+# Fase 5b: catálogo de invocación por datos (antes 6 kinds sin spawn real).
+const SPAWNABLE: Array = [
+	{"label": "Goblin Burócrata", "path": "res://data/enemies/goblin_burocrata.tres"},
+	{"label": "Esqueleto Desmotivado", "path": "res://data/enemies/esqueleto_desmotivado.tres"},
+	{"label": "Limo de Café Rancio", "path": "res://data/enemies/limo_toxico.tres"},
+	{"label": "Mímico de Archivo", "path": "res://data/enemies/mimeto_archivo.tres"},
+	{"label": "Lancero Goblin Nocturno", "path": "res://data/enemies/goblin_nocturno.tres"},
+	{"label": "Troll de Piedra", "path": "res://data/enemies/troll_piedra.tres"},
+	{"label": "Guerrero del Caos", "path": "res://data/enemies/guerrero_caos.tres"},
+	{"label": "Rey Orco del Karaoke (jefe)", "path": "res://data/enemies/rey_orco_karaoke.tres"},
+	{"label": "Balthazar Auditor (jefe)", "path": "res://data/enemies/demonio_auditoria.tres"},
+	{"label": "Grimgar Kaudillo (jefe)", "path": "res://data/enemies/caudillo_orco_negro.tres"},
+	{"label": "Malakor Profanador (jefe)", "path": "res://data/enemies/paladin_elegido_caos.tres"},
+]
 
 func _ready() -> void:
 	visible = false
@@ -58,14 +73,16 @@ func _build_ui() -> void:
 	vbox.add_child(lbl_enemies)
 
 	enemy_type_option = OptionButton.new()
-	enemy_type_option.add_item("Goblin Burócrata", Enums.EnemyKind.GOBLIN_BUROCRATA)
-	enemy_type_option.add_item("Esqueleto Desmotivado", Enums.EnemyKind.ESQUELETO_DESMOTIVADO)
-	enemy_type_option.add_item("Orco Chistoso", Enums.EnemyKind.ORCO_CHISTOSO)
-	enemy_type_option.add_item("Mímico Existencial", Enums.EnemyKind.MIMICO_EXISTENCIAL)
-	enemy_type_option.add_item("Limo de la Nostalgia", Enums.EnemyKind.LIMO_NOSTALGIA)
-	enemy_type_option.add_item("Rey Orco del Karaoke", Enums.EnemyKind.REY_ORCO_KARAOKE)
-	enemy_type_option.item_selected.connect(func(idx): selected_enemy_kind = enemy_type_option.get_item_id(idx) as Enums.EnemyKind)
+	for entry in SPAWNABLE:
+		enemy_type_option.add_item(entry["label"])
+	enemy_type_option.item_selected.connect(func(idx): selected_spawn_path = SPAWNABLE[idx]["path"])
 	vbox.add_child(enemy_type_option)
+
+	var btn_spawn := Button.new()
+	btn_spawn.text = "👹 Invocar en Celda Libre"
+	btn_spawn.tooltip_text = "Genera al monstruo en una casilla de suelo libre al azar (verdad de exploración)."
+	btn_spawn.pressed.connect(_on_spawn_pressed)
+	vbox.add_child(btn_spawn)
 
 	check_fog = CheckBox.new()
 	check_fog.text = "Desactivar Niebla de Guerra"
@@ -132,6 +149,31 @@ func _on_kill_enemies_pressed() -> void:
 	if EventBus:
 		EventBus.combat_log_appended.emit("[DJ] %d aberraciones eliminadas por el Director del Caos." % slain, "crit")
 		EventBus.redraw_requested.emit()
+
+func _on_spawn_pressed() -> void:
+	var grid := _find_grid()
+	if grid == null:
+		return
+	var data: EnemyData = load(selected_spawn_path) as EnemyData
+	if data == null:
+		push_error("[DJ] No se pudo cargar: %s" % selected_spawn_path)
+		return
+	var cell := _find_free_cell(grid)
+	if cell == Vector2i(-1, -1):
+		if EventBus: EventBus.combat_log_appended.emit("[DJ] Sin celdas libres para invocar.", "info")
+		return
+	var token := ActLoader.build_enemy_token(data, "dj_enemy_%d" % Time.get_ticks_msec(), data.enemy_name)
+	grid.register_unit(token, cell)
+	if EventBus:
+		EventBus.combat_log_appended.emit("[DJ] Invocado %s en [%d, %d]." % [data.enemy_name, cell.x, cell.y], "crit")
+		EventBus.redraw_requested.emit()
+
+func _find_free_cell(grid: TacticalGrid) -> Vector2i:
+	for i in 40:
+		var p := Vector2i(randi() % TacticalGrid.WIDTH, randi() % TacticalGrid.HEIGHT)
+		if grid.get_cell_type(p) == Enums.CellType.FLOOR and not grid.units_by_pos.has(p):
+			return p
+	return Vector2i(-1, -1)
 
 func _find_grid() -> TacticalGrid:
 	var gm = get_tree().get_root().get_node_or_null("MainGame")
