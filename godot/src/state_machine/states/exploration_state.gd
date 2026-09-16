@@ -132,6 +132,8 @@ func _execute_hero_path(path: Array[Vector2i], unit: Dictionary) -> void:
 	_check_cell_interaction(final_pos, unit)
 	is_moving_hero = false
 	select_hero(selected_hero_id)
+	# Fase 3: autosave tras cada movimiento (antes de posible transición a combate).
+	if EventBus: EventBus.turn_ended.emit(unit)
 	_check_for_combat(final_pos)
 
 func _check_cell_interaction(pos: Vector2i, unit: Dictionary) -> void:

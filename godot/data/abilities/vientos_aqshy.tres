@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data_classes/ability_data.gd" id="1_ab"]
+
+[resource]
+script = ExtResource("1_ab")
+id = "ab_vientos_aqshy"
+ability_name = "Vientos de Aqshy"
+description = "Valtieri abre de par en par el Viento de Fuego: devastación en área amplia, pero la Disfunción acecha (pifia con 1-2)."
+cost = 3
+required_level = 1
+range_distance = 4
+area_radius = 3
+damage_dice_count = 3
+damage_dice_sides = 6
+damage_flat_bonus = 0
+backlash_threshold = 2

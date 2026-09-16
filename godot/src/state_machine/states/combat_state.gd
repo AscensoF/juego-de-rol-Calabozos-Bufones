@@ -300,6 +300,8 @@ func _get_first_alive_hero() -> Dictionary:
 
 func next_turn() -> void:
 	if check_battle_end(): return
+	# Fase 3: autosave por turno (PRODUCT_BIBLE: cero fricción).
+	if EventBus: EventBus.turn_ended.emit(current_unit)
 	start_turn(current_turn_index + 1)
 
 func check_battle_end() -> bool:

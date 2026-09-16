@@ -4,12 +4,12 @@
 
 [resource]
 script = ExtResource("1_ab")
-id = "ab_golpe_matador"
-ability_name = "Tajo de Gromril"
-description = "Un golpe devastador con el hacha a dos manos que desgarra la armadura del enemigo e inflige daño crítico masivo."
+id = "ab_dardo_ignio"
+ability_name = "Dardo Ígneo"
+description = "Un dardo concentrado del Viento Aqshy: preciso, sin área y sin riesgo de Disfunción."
 cost = 1
 required_level = 1
-range_distance = 1
+range_distance = 5
 damage_dice_count = 2
 damage_dice_sides = 6
-damage_flat_bonus = 3
+damage_flat_bonus = 2

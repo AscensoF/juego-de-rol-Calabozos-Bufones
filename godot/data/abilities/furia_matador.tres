@@ -4,14 +4,12 @@
 
 [resource]
 script = ExtResource("1_ab")
-id = "ab_llama_aqshy"
-ability_name = "Furia de Aqshy"
-description = "Desata una llamarada incandescente del Viento de Fuego que calcina a los enemigos en área. Riesgo de Disfunción con pifia."
+id = "ab_furia_matador"
+ability_name = "Furia del Matador"
+description = "Gotreksson canaliza su Juramento: un tajo brutal que crece con sus heridas (sinergia con Voto del Matador)."
 cost = 2
 required_level = 1
-range_distance = 3
-area_radius = 2
+range_distance = 1
 damage_dice_count = 2
 damage_dice_sides = 8
 damage_flat_bonus = 2
-backlash_threshold = 1

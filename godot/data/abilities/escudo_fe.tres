@@ -4,13 +4,13 @@
 
 [resource]
 script = ExtResource("1_ab")
-id = "ab_plegaria_sigmar"
-ability_name = "Plegaria de Sanación"
-description = "Una plegaria ferviente a Sigmar Heldenhammer que restaura la vida y la moral de los aliados cercanos."
+id = "ab_escudo_fe"
+ability_name = "Escudo de Fe"
+description = "Beryl impone las manos sobre un aliado: lo sana y lo envuelve en un escudo de fe (+CA defensiva)."
 cost = 2
 required_level = 1
 range_distance = 3
-area_radius = 2
-heal_dice_count = 2
+heal_dice_count = 1
 heal_dice_sides = 6
-heal_flat_bonus = 4
+heal_flat_bonus = 2
+status_duration_turns = 2

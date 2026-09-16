@@ -4,13 +4,12 @@
 
 [resource]
 script = ExtResource("1_ab")
-id = "ab_disparo_polvora"
-ability_name = "Virote de Plata & Pólvora"
-description = "Disparo perforante de pistola de chispa imperial bendecida contra monstruos y herejes."
+id = "ab_virote_plata"
+ability_name = "Virote de Plata"
+description = "Disparo de ballesta de largo alcance con virotes de plata bendita. Preciso y silencioso."
 cost = 1
 required_level = 1
-range_distance = 4
-area_radius = 1
+range_distance = 6
 damage_dice_count = 1
-damage_dice_sides = 10
-damage_flat_bonus = 4
+damage_dice_sides = 8
+damage_flat_bonus = 3

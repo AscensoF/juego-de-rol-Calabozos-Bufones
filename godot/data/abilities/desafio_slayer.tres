@@ -4,13 +4,13 @@
 
 [resource]
 script = ExtResource("1_ab")
-id = "ab_disparo_polvora"
-ability_name = "Virote de Plata & Pólvora"
-description = "Disparo perforante de pistola de chispa imperial bendecida contra monstruos y herejes."
-cost = 1
+id = "ab_desafio_slayer"
+ability_name = "Desafío del Matador"
+description = "Un rugido de desafío que atrae a los enemigos cercanos y descarga un mandoble giratorio sobre todos ellos."
+cost = 2
 required_level = 1
-range_distance = 4
+range_distance = 1
 area_radius = 1
 damage_dice_count = 1
-damage_dice_sides = 10
-damage_flat_bonus = 4
+damage_dice_sides = 6
+damage_flat_bonus = 2

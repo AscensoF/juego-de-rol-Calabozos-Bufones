@@ -60,29 +60,81 @@ func _execute_warhammer_ability() -> void:
 				if EventBus: EventBus.combat_log_appended.emit("¡Disparo certero de pólvora bendita! %d de daño perforante a %s." % [res["damage"], target.get("name", "el enemigo")], "crit")
 
 		"ab_llama_aqshy":
-			# Furia de Aqshy (Valtieri): Fuego mágico con riesgo de Disfunción de la Disformidad
+			# Furia de Aqshy (Valtieri): Fuego mágico con riesgo de Disfunción de la Disformidad.
+			# Fase 3: números desde datos (antes hardcodeados y con campos inexistentes que crasheaban).
 			var d20: int = (randi() % 20) + 1
-			if d20 == 1:
+			if d20 <= maxi(1, ability.backlash_threshold):
 				# ¡Pifia de la Disformidad!
 				var miscast_msg = CombatRules.resolve_warp_miscast(actor, all_units, grid)
 				if EventBus: EventBus.combat_log_appended.emit(miscast_msg, "damage")
 			else:
 				# Llama en área
-				var dmg: int = DiceRoller.roll_dice(2, 8) + 2
+				var dmg: int = DiceRoller.roll_dice(ability.damage_dice_count, ability.damage_dice_sides) + ability.damage_flat_bonus
+				var radius: int = maxi(1, ability.area_radius)
 				for u in all_units:
 					if not u.get("is_hero", false) and u.get("is_alive", false):
-						if grid.get_distance(target_pos, u.get("pos", Vector2i(-1, -1))) <= ability.area_of_effect:
+						if grid.get_distance(target_pos, u.get("pos", Vector2i(-1, -1))) <= radius:
 							_apply_damage_to_target(u, dmg, d20 == 20)
 				if EventBus: EventBus.combat_log_appended.emit("¡Llamas de Aqshy calcinan a los enemigos en el área infligiendo %d de daño de fuego!" % dmg, "crit")
 
 		"ab_plegaria_sigmar":
-			# Plegaria de Sanación (Hermana Beryl): Curación grupal y valor
-			var heal_amount: int = DiceRoller.roll_dice(2, 6) + 4
+			# Plegaria de Sanación (Hermana Beryl): Curación grupal y valor.
+			# Fase 3: números desde datos (antes hardcodeados y con campo inexistente que crasheaba).
+			var heal_amount: int = DiceRoller.roll_dice(ability.heal_dice_count, ability.heal_dice_sides) + ability.heal_flat_bonus
+			var heal_radius: int = maxi(1, ability.area_radius)
 			for u in all_units:
 				if u.get("is_hero", false) and u.get("is_alive", false):
-					if grid.get_distance(actor.get("pos", Vector2i.ZERO), u.get("pos", Vector2i(-1, -1))) <= ability.range_tiles:
+					if grid.get_distance(actor.get("pos", Vector2i.ZERO), u.get("pos", Vector2i(-1, -1))) <= heal_radius:
 						_apply_heal_to_target(u, heal_amount)
 			if EventBus: EventBus.combat_log_appended.emit("¡Por la Gracia de Sigmar! La Hermana Beryl restaura %d heridas a los aliados cercanos." % heal_amount, "heal")
+
+		# Fase 3: segundos kits del roster canon (números siempre desde datos).
+		"ab_desafio_slayer":
+			# Desafío del Matador: mandoble giratorio a todos los enemigos adyacentes.
+			var spin_dmg: int = DiceRoller.roll_dice(ability.damage_dice_count, ability.damage_dice_sides) + ability.damage_flat_bonus
+			var spin_radius: int = maxi(1, ability.area_radius)
+			var enemies_hit := 0
+			for u in all_units:
+				if not u.get("is_hero", false) and u.get("is_alive", false):
+					if grid.get_distance(actor.get("pos", Vector2i.ZERO), u.get("pos", Vector2i(-1, -1))) <= spin_radius:
+						_apply_damage_to_target(u, spin_dmg, false)
+						enemies_hit += 1
+			if EventBus: EventBus.combat_log_appended.emit("¡Desafío del Matador! El mandoble alcanza a %d enemigos (%d de daño)." % [enemies_hit, spin_dmg], "damage")
+
+		"ab_bomba_polvora":
+			# Bomba de Pólvora (Kallina): explosión en área sobre la posición objetivo.
+			var blast_dmg: int = DiceRoller.roll_dice(ability.damage_dice_count, ability.damage_dice_sides) + ability.damage_flat_bonus
+			var blast_radius: int = maxi(1, ability.area_radius)
+			for u in all_units:
+				if not u.get("is_hero", false) and u.get("is_alive", false):
+					if grid.get_distance(target_pos, u.get("pos", Vector2i(-1, -1))) <= blast_radius:
+						_apply_damage_to_target(u, blast_dmg, false)
+			if EventBus: EventBus.combat_log_appended.emit("¡Bomba de Pólvora! La explosión inflige %d de daño en área." % blast_dmg, "crit")
+
+		"ab_vientos_aqshy":
+			# Vientos de Aqshy (Valtieri): área amplia con Disfunción en 1-2.
+			var wind_d20: int = (randi() % 20) + 1
+			if wind_d20 <= maxi(1, ability.backlash_threshold):
+				var wind_miscast = CombatRules.resolve_warp_miscast(actor, all_units, grid)
+				if EventBus: EventBus.combat_log_appended.emit(wind_miscast, "damage")
+			else:
+				var wind_dmg: int = DiceRoller.roll_dice(ability.damage_dice_count, ability.damage_dice_sides) + ability.damage_flat_bonus
+				var wind_radius: int = maxi(1, ability.area_radius)
+				for u in all_units:
+					if not u.get("is_hero", false) and u.get("is_alive", false):
+						if grid.get_distance(target_pos, u.get("pos", Vector2i(-1, -1))) <= wind_radius:
+							_apply_damage_to_target(u, wind_dmg, wind_d20 == 20)
+				if EventBus: EventBus.combat_log_appended.emit("¡Los Vientos de Aqshy arrasan la zona infligiendo %d de daño de fuego!" % wind_dmg, "crit")
+
+		"ab_escudo_fe":
+			# Escudo de Fe (Beryl): sana al objetivo y le otorga postura defensiva (+4 CA).
+			var ward_heal: int = DiceRoller.roll_dice(ability.heal_dice_count, ability.heal_dice_sides) + ability.heal_flat_bonus
+			_apply_heal_to_target(target, ward_heal)
+			var ward_rounds: int = maxi(1, ability.status_duration_turns)
+			var t_buffs: Array = target.get("buffs", [])
+			t_buffs.append({"type": Enums.StatusEffectType.DEFENDING, "duration": ward_rounds})
+			target["buffs"] = t_buffs
+			if EventBus: EventBus.combat_log_appended.emit("¡Escudo de Fe! %s recupera %d PV y queda defendido (+4 CA, %d turnos)." % [target.get("name", "el aliado"), ward_heal, ward_rounds], "heal")
 
 		_:
 			var res := CombatRules.resolve_attack(actor, target, grid, ability.damage_dice_count, ability.damage_dice_sides, ability.damage_flat_bonus)

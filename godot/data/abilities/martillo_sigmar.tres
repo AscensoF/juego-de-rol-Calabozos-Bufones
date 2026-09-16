@@ -4,13 +4,12 @@
 
 [resource]
 script = ExtResource("1_ab")
-id = "ab_disparo_polvora"
-ability_name = "Virote de Plata & Pólvora"
-description = "Disparo perforante de pistola de chispa imperial bendecida contra monstruos y herejes."
+id = "ab_martillo_sigmar"
+ability_name = "Martillo de Sigmar"
+description = "Beryl descarga su martillo de guerra consagrado sobre el hereje más cercano."
 cost = 1
 required_level = 1
-range_distance = 4
-area_radius = 1
+range_distance = 1
 damage_dice_count = 1
-damage_dice_sides = 10
-damage_flat_bonus = 4
+damage_dice_sides = 8
+damage_flat_bonus = 2

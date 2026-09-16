@@ -35,6 +35,7 @@ func _ready():
 	_setup_initial_inventory()
 	_load_act(1)
 	_subscribe_inventory_events()
+	_subscribe_turn_events()
 	_trigger_intro_dialogue()
 
 func _setup_camera():
@@ -111,6 +112,22 @@ func remove_item_from_inventory(item_id: String) -> void:
 func _subscribe_inventory_events() -> void:
 	if not EventBus: return
 	EventBus.item_used.connect(_on_item_used)
+
+# Fase 3: autosave por turno. Snapshot v1: acto + inventario + PV de héroes
+# del grid táctico (verdad en exploración; en combate refleja pre-combate —
+# snapshot completo de combate queda para backlog).
+func _subscribe_turn_events() -> void:
+	if not EventBus: return
+	EventBus.turn_ended.connect(_on_turn_ended)
+
+func _on_turn_ended(_unit: Dictionary) -> void:
+	var heroes_hp := {}
+	if tactical_grid:
+		for pos in tactical_grid.units_by_pos:
+			var u = tactical_grid.units_by_pos[pos]
+			if u.get("is_hero", false):
+				heroes_hp[u.get("id", "")] = u.get("hp", 0)
+	SaveSystem.auto_save_campaign_progress(current_act_number, party_inventory, heroes_hp, [])
 
 func _on_item_used(item_id: String, user_id: String) -> void:
 	var item_dict: Dictionary = {}
