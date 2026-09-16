@@ -42,6 +42,10 @@ const COLOR_PATH_LINE := Color(0.25, 0.80, 0.95, 0.90)
 const FOG_FADE_DURATION := 0.6
 
 var torch_time: float = 0.0
+# Fase 2: throttle de redibujado (batería móvil). El tablero se redibuja solo
+# si hay animación viva (textos, flashes, lunges) o cada tick de antorcha.
+const TORCH_TICK := 0.06
+var _torch_accum: float = 0.0
 
 func _ready() -> void:
 	_init_fog()
@@ -78,9 +82,6 @@ func _on_health_updated_flash(unit_id: String, _hp: int, _hp_max: int, delta_hp:
 		flash_units[unit_id] = 0.35
 
 func _process(delta: float) -> void:
-	torch_time += delta * 3.0
-	var needs_redraw := true
-	
 	if not floating_texts.is_empty():
 		var remove_indices: Array = []
 		for i in floating_texts.size():
@@ -100,8 +101,20 @@ func _process(delta: float) -> void:
 				expired.append(uid)
 		for uid in expired:
 			flash_units.erase(uid)
-	
-	queue_redraw()
+
+	_torch_accum += delta
+	var torch_tick := false
+	if _torch_accum >= TORCH_TICK:
+		_torch_accum = 0.0
+		torch_time += TORCH_TICK * 3.0
+		torch_tick = true
+
+	var animated := torch_tick \
+		or not floating_texts.is_empty() \
+		or not flash_units.is_empty() \
+		or not unit_offsets.is_empty()
+	if animated:
+		queue_redraw()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
@@ -136,6 +149,12 @@ func grid_to_world(grid_pos: Vector2i) -> Vector2:
 	return grid_origin + Vector2(grid_pos.x * tile_size, grid_pos.y * tile_size)
 
 func _get_unit_texture(unit: Dictionary) -> Texture2D:
+	# Fase 2: el retrato sale del recurso de datos (EnemyData/HeroData.portrait).
+	# El matching por nombre dejaba invisibles a troll, guerrero del caos,
+	# paladín y mímico (ningún substring coincidía).
+	var data = unit.get("data")
+	if data and data.get("portrait"):
+		return data.get("portrait")
 	var is_hero: bool = unit.get("is_hero", false)
 	var u_name: String = unit.get("name", "").to_lower()
 	var path := ""

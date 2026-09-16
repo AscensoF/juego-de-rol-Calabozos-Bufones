@@ -8,6 +8,9 @@ var current_track: String = ""
 var sfx_players: Array[AudioStreamPlayer] = []
 const MAX_SFX_PLAYERS := 6
 var next_sfx_idx: int = 0
+# Fase 2: caché de SFX procedurales. Antes se sintetizaba el WAV en cada
+# impacto (bucle de ~7700 muestras por golpe); ahora una vez por tipo.
+var sfx_cache: Dictionary = {}
 
 func _ready() -> void:
 	music_player = AudioStreamPlayer.new()
@@ -51,7 +54,9 @@ func play_sfx(type: String) -> void:
 	var player: AudioStreamPlayer = sfx_players[next_sfx_idx]
 	next_sfx_idx = (next_sfx_idx + 1) % MAX_SFX_PLAYERS
 
-	var stream = _generate_procedural_sfx(type)
+	if not sfx_cache.has(type):
+		sfx_cache[type] = _generate_procedural_sfx(type)
+	var stream = sfx_cache[type]
 	if stream:
 		player.stream = stream
 		player.play()

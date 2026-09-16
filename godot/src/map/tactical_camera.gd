@@ -5,6 +5,9 @@ extends Camera2D
 
 var zoom_target := Vector2(2.0, 2.0) # Zoom inicial más cercano (x2)
 var is_dragging := false
+# Fase 2: pinch-to-zoom táctil (dos dedos). Single-finger drag intacto.
+var _touches: Dictionary = {}
+var _pinch_base_dist: float = 0.0
 
 var shake_intensity: float = 0.0
 var shake_decay: float = 12.0
@@ -36,12 +39,29 @@ func _unhandled_input(event: InputEvent) -> void:
 			zoom_target -= Vector2(0.2, 0.2)
 	
 	elif event is InputEventScreenTouch:
-		pass
+		if event.pressed:
+			_touches[event.index] = event.position
+		else:
+			_touches.erase(event.index)
+		_pinch_base_dist = _current_touch_dist()
 
 	if event is InputEventMouseMotion and is_dragging:
 		position -= event.relative / zoom
 	elif event is InputEventScreenDrag:
-		position -= event.relative / zoom
+		_touches[event.index] = event.position
+		if _touches.size() == 2:
+			var d := _current_touch_dist()
+			if _pinch_base_dist > 0.0 and d > 0.0:
+				zoom_target *= d / _pinch_base_dist
+			_pinch_base_dist = d
+		else:
+			position -= event.relative / zoom
+
+func _current_touch_dist() -> float:
+	if _touches.size() < 2:
+		return 0.0
+	var pts: Array = _touches.values()
+	return (pts[0] as Vector2 - pts[1] as Vector2).length()
 
 func _process(delta: float) -> void:
 	zoom_target = zoom_target.clamp(Vector2(0.8, 0.8), Vector2(4.0, 4.0))

@@ -76,6 +76,38 @@ func _ready() -> void:
 	_build_inventory_dock()
 	_build_compact_combat_log()
 	_connect_events()
+	_apply_safe_area()
+	get_viewport().size_changed.connect(_apply_safe_area)
+
+# Fase 2: respeta notch / Dynamic Island / home indicator (iOS safe area,
+# Android display cutout). En escritorio los insets son 0 y no cambia nada.
+func _apply_safe_area() -> void:
+	var vp_size := get_viewport().get_visible_rect().size
+	var safe := DisplayServer.get_display_safe_area()
+	var top_inset := maxf(0.0, safe.position.y)
+	var bottom_inset := maxf(0.0, vp_size.y - (safe.position.y + safe.size.y))
+	var left_inset := maxf(0.0, safe.position.x)
+	var right_inset := maxf(0.0, vp_size.x - (safe.position.x + safe.size.x))
+	var banner = find_child("StatusBanner", false, false)
+	if banner:
+		banner.offset_top = 8.0 + top_inset
+		banner.offset_bottom = 44.0 + top_inset
+	var track = find_child("TurnTrackPanel", false, false)
+	if track:
+		track.offset_top = 50.0 + top_inset
+		track.offset_bottom = 90.0 + top_inset
+	var sidebar = find_child("PartySideBar", false, false)
+	if sidebar:
+		sidebar.position = Vector2(12.0 + left_inset, 12.0 + top_inset)
+	var log_panel = find_child("CompactLog", false, false)
+	if log_panel:
+		log_panel.position = Vector2(-360.0 - right_inset, 12.0 + top_inset)
+	if action_bar:
+		action_bar.offset_top = -80.0 - bottom_inset
+		action_bar.offset_bottom = -12.0 - bottom_inset
+	if inventory_panel:
+		inventory_panel.offset_top = -140.0 - bottom_inset
+		inventory_panel.offset_bottom = -88.0 - bottom_inset
 
 func _build_top_status_banner() -> void:
 	var panel := PanelContainer.new()
@@ -474,7 +506,8 @@ func _render_inventory_items() -> void:
 	for it in game_manager.party_inventory:
 		var item_btn := Button.new()
 		item_btn.text = "%s %s" % [it.get("icon", "📦"), it.get("name", "Objeto")]
-		item_btn.custom_minimum_size = Vector2(150, 36)
+		# Fase 2: altura táctil mínima 48px (HIG/Human Interface + Material).
+		item_btn.custom_minimum_size = Vector2(150, 48)
 		var it_id: String = it.get("id", "")
 		item_btn.pressed.connect(func():
 			var uid = current_active_unit.get("id", "hero_0")

@@ -17,6 +17,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 config/name="Calabozos & Bufones"
 config/description="RPG táctico por turnos satírico, modular y data-driven para plataformas móviles."
 config/version="2.0.0"
+config/icon="res://assets/sprites/ui/logo.png"
 run/main_scene="res://src/ui/main_menu.tscn"
 config/features=PackedStringArray("4.7")
 boot_splash/bg_color=Color(0.0588235, 0.0901961, 0.164706, 1)
